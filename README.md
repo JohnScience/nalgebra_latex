@@ -69,6 +69,7 @@ LaTeX is a language for typesetting documents, especially scientific papers, and
 [`nalgebra_latex`]: https://crates.io/crates/nalgebra_latex
 [`nalgebra`]: https://crates.io/crates/nalgebra
 [what is latex]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+[`nalgebra::Matrix`]: https://docs.rs/nalgebra/latest/nalgebra/base/struct.Matrix.html
 
 # License
 
