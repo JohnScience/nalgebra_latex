@@ -21,7 +21,7 @@ include = [
     "/LICENSE_APACHE",
     "/LICENSE_MIT",
     "/README.md",
-    "/src/lib.rs",
+    "/src/**",
     "/tests/**",
 ]
 # publish | not needed
