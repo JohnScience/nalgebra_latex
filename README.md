@@ -3,13 +3,14 @@
 
 # [`nalgebra`] extension for LaTeX
 
-The crate provides very few robust formatters for [`nalgebra::Matrix`].
+The crate provides very few robust formatters for [`nalgebra::Matrix`] as well as
+several LaTeX environments for customization.
 
 ## Example
 
 ```rust
 	use nalgebra::matrix;
-	use nalgebra_latex::{PlainMatrixFormatter, LatexFormatter};
+	use nalgebra_latex::fmt::{PlainMatrixFormatter, LatexFormatter};
 
 	let mut s = String::new();
 	let m = matrix!(
