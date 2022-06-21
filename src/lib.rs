@@ -1,8 +1,10 @@
 #![doc = include_str!("../README.md")]
-#![cfg_attr(not(any(doc,test,doctest)), no_std)]
+#![cfg_attr(not(any(doc,test,doctest, feature = "lin_sys")), no_std)]
 
 pub mod env;
 pub mod fmt;
+#[cfg(feature = "lin_sys")]
+pub mod lin_sys;
 
 #[cfg(test)]
 mod tests {
