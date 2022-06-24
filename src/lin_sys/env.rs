@@ -1,9 +1,14 @@
+//! A module offering contents-unaware [LaTeX] [environments] for [`nalgebra_linsys`].
+//!
+//! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+//! [environments]: https://www.overleaf.com/learn/latex/Environments
+
 use crate::env::LatexEnvironment;
 
 /// Representation of `cases` [LaTeX] [environment].
-/// 
+///
 /// For examples of usage, see [`LatexEnvironment`].
-/// 
+///
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
 pub struct CasesEnvironment;
