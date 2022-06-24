@@ -133,6 +133,9 @@ pub trait Unknowns {
 /// variables over which [linear systems] are defined.
 ///
 /// Existence of type parameter `L` can allow either runtime or compile-time access to the length of the vector.
+/// 
+/// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+/// [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations
 pub struct SingleLetterBoldfaceVecOfUnknowns<L> {
     /// The name of the vector of unknowns, e.g. **x**
     pub c: char,
