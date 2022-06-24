@@ -6,6 +6,7 @@
 //! variables over which [linear systems] are defined.
 //!
 //! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+//! [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations
 
 use crate::lin_sys::err::OutOfBoundsError;
 use core::fmt::Write;
