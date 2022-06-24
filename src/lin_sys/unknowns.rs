@@ -3,6 +3,13 @@ use core::fmt::Write;
 use nalgebra::Dim;
 use either::Either;
 
+/// Its implementors represent so-called "vectors of unknowns"
+/// 
+/// # Notes
+/// 
+/// The term is frequently, if not primarily, used with respect to variables over which [linear systems] are defined.
+/// 
+/// [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations 
 pub trait Unknowns {
     fn write_latex<W: Write>(&self, w: &mut W) -> Result<(),core::fmt::Error>;
     fn validate_idx(&self, idx: usize) -> Result<(), OutOfBoundsError>;

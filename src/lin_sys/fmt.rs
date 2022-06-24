@@ -1,3 +1,9 @@
+//! A module offering a number of [LaTeX] formatters for entities from [`nalgebra_linsys`].
+//! 
+//! 
+//! [`nalgebra_linsys`]: https://crates.io/crates/nalgebra_linsys
+//! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+
 use core::fmt::{Write, Display};
 
 use nalgebra::{Dim, RawStorage};
@@ -53,6 +59,10 @@ use crate::{
 /// ["environment"]: https://www.overleaf.com/learn/latex/Environments
 pub struct PlainLinSysFormatter;
 
+/// Formatter for [linear systems] using [`CasesEnvironment`], which represents `cases` [environment].
+/// 
+/// [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations
+/// [environment]: https://www.overleaf.com/learn/latex/Environments
 pub struct CasesLinSysFormatter;
 
 impl <T,R,C,S,U> LatexFormatter<LinSys<T,R,C,S,U>> for PlainLinSysFormatter
