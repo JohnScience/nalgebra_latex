@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(any(doc, test, doctest, feature = "lin_sys")), no_std)]
+#![cfg_attr(feature = "adt_const_params", feature(adt_const_params))]
 
 pub mod env;
 pub mod fmt;

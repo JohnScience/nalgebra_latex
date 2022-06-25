@@ -44,3 +44,5 @@ either = { version = "1.6.1", optional = true }
 [features]
 lin_sys = ["nalgebra_linsys", "thiserror", "either"]
 default = ["lin_sys"]
+nightly = ["adt_const_params"]
+adt_const_params = []

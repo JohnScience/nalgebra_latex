@@ -22,7 +22,8 @@ use nalgebra::{Dim, RawStorage};
 /// use nalgebra_latex::{
 ///     lin_sys::{
 ///         LinSys,
-///         unknowns::SingleLetterVecOfUnknowns,
+///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+///         numbering::Numbering,
 ///         fmt::PlainLinSysFormatter,
 ///     },
 ///     fmt::LatexFormatter,
@@ -34,14 +35,14 @@ use nalgebra::{Dim, RawStorage};
 ///     4,5,6;
 ///     7,8,9;
 /// );
-/// let vec_of_unknowns = SingleLetterVecOfUnknowns {
-///     c: 'x',
+/// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new(
+///     'x',
 ///     // use nalgebra::Const if you can keep the size unchanged
-///     len: Dynamic::new(3),
-/// };
+///     Dynamic::new(3)
+/// );
 /// let ls = LinSys::new(m, vec_of_unknowns);
 /// PlainLinSysFormatter::write_latex(&mut s, &ls).unwrap();
-/// assert_eq!(s, r"1x_{0}+2x_{1}+3x_{2}\\4x_{0}+5x_{1}+6x_{2}\\7x_{0}+8x_{1}+9x_{2}");
+/// assert_eq!(s, r"1x_{1}+2x_{2}+3x_{3}\\4x_{1}+5x_{2}+6x_{3}\\7x_{1}+8x_{2}+9x_{3}");
 /// ```
 ///
 /// # Notes

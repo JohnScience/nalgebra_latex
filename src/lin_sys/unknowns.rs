@@ -8,8 +8,11 @@
 //! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 //! [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations
 
-use crate::lin_sys::err::OutOfBoundsError;
-use core::fmt::Write;
+use crate::lin_sys::{
+    err::OutOfBoundsError,
+    numbering::{Numbering, NumberingTy},
+};
+use core::{fmt::Write, marker::PhantomData};
 use either::Either;
 use nalgebra::Dim;
 
@@ -128,23 +131,41 @@ pub trait Unknowns {
 /// `L` - the type of dimension (=length) of the vector of unknowns. When the type implements [`Dim`] trait,
 /// extra functionality is provided.
 ///
+/// `N` - constant parameter, the kind of numbering used for formatting of indices of entries in the
+/// vector of unknowns.
+///
 /// # Notes
 ///
 /// The term "vector of unknowns" is frequently, if not primarily, used with respect to
 /// variables over which [linear systems] are defined.
 ///
 /// Existence of type parameter `L` can allow either runtime or compile-time access to the length of the vector.
-/// 
+///
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 /// [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations
-pub struct SingleLetterBoldfaceVecOfUnknowns<L> {
+pub struct SingleLetterBoldfaceVecOfUnknowns<L, const N: NumberingTy> {
     /// The name of the vector of unknowns, e.g. **x**
     pub c: char,
     /// The length of the vector of unknowns
     pub len: L,
+    // the private field forbids the usage of "default contructor"
+    phantom: PhantomData<()>,
 }
 
-impl<L> Unknowns for SingleLetterBoldfaceVecOfUnknowns<L>
+impl<L, const N: NumberingTy> SingleLetterBoldfaceVecOfUnknowns<L, N> {
+    #[cfg_attr(not(feature = "adt_const_params"), allow(non_upper_case_globals))]
+    pub fn new(c: char, len: L) -> Self {
+        use Numbering::*;
+        debug_assert!(matches!(N, ZeroBased | OneBased));
+        Self {
+            c,
+            len,
+            phantom: PhantomData::<()>,
+        }
+    }
+}
+
+impl<L, const N: NumberingTy> Unknowns for SingleLetterBoldfaceVecOfUnknowns<L, N>
 where
     L: Copy + Dim,
 {
@@ -152,19 +173,31 @@ where
         w.write_fmt(format_args!("\\textbf{{{}}}", self.c))
     }
 
-    fn validate_idx(&self, idx: usize) -> Result<(), OutOfBoundsError> {
-        if idx >= self.len.value() {
+    fn validate_idx(&self, zbi: usize) -> Result<(), OutOfBoundsError> {
+        if zbi >= self.len.value() {
             Err(OutOfBoundsError)
         } else {
             Ok(())
         }
     }
 
+    #[cfg_attr(not(feature = "adt_const_params"), allow(non_upper_case_globals))]
     unsafe fn write_latex_for_ith_unchecked<W: Write>(
         &self,
         w: &mut W,
         zbi: usize,
     ) -> Result<(), core::fmt::Error> {
-        w.write_fmt(format_args!("{}_{{{}}}", self.c, zbi))
+        use Numbering::*;
+
+        w.write_fmt(format_args!(
+            "{}_{{{}}}",
+            self.c,
+            match N {
+                ZeroBased => zbi,
+                OneBased => zbi + 1,
+                #[cfg_attr(feature = "adt_const_params", allow(unreachable_patterns))]
+                _ => panic!("unsupported numbering"),
+            }
+        ))
     }
 }
