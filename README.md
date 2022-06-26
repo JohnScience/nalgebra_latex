@@ -3,8 +3,10 @@
 
 # [`nalgebra`] extension for LaTeX
 
-The crate provides very few robust formatters for [`nalgebra::Matrix`] as well as
+The crate provides several robust formatters for [`nalgebra::Matrix`] as well as
 several LaTeX environments for customization.
+
+On top of that, the crate offers feature-gated support for [`nalgebra_linsys`].
 
 ## Example
 
@@ -67,10 +69,15 @@ LaTeX is a language for typesetting documents, especially scientific papers, and
 
 * [LaTeX documentation on Overleaf](https://www.overleaf.com/learn)
 
+## Other useful links
+
+* [The list of features on docs.rs](https://docs.rs/crate/nalgebra_latex/latest/features)
+
 [`nalgebra_latex`]: https://crates.io/crates/nalgebra_latex
 [`nalgebra`]: https://crates.io/crates/nalgebra
 [what is latex]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 [`nalgebra::Matrix`]: https://docs.rs/nalgebra/latest/nalgebra/base/struct.Matrix.html
+[`nalgebra_linsys`]: https://crates.io/crates/nalgebra_linsys
 
 # License
 
