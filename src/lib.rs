@@ -6,6 +6,7 @@
 pub mod env;
 pub mod fmt;
 #[cfg(feature = "lin_sys")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
 pub mod lin_sys;
 
 #[cfg(test)]
