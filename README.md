@@ -68,6 +68,7 @@ LaTeX is a language for typesetting documents, especially scientific papers, and
 ## Resources on LaTeX
 
 * [LaTeX documentation on Overleaf](https://www.overleaf.com/learn)
+* [`amsmath` matrix environments and inline matrices](https://www.overleaf.com/learn/latex/Matrices)
 
 ## Other useful links
 
