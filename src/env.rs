@@ -70,7 +70,7 @@ use core::fmt::{Error, Write};
 /// let m = Matrix2::new(1, 2, 3, 4);
 ///
 /// MyMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{mymatrix}1&2\\3&4\end{mymatrix}");
+/// assert_eq!(s, r"\begin{mymatrix}$1$&$2$\\$3$&$4$\end{mymatrix}");
 ///
 /// ```
 ///

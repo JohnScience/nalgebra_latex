@@ -37,7 +37,7 @@ use nalgebra::{Dim, Matrix, RawStorage};
 /// // The fully-qualified syntax <Type as Trait>::method_name is used to demonstrate the origin
 /// // of write_latex() method
 /// <PlainMatrixFormatter as LatexFormatter<_>>::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}");
+/// assert_eq!(s, r"\begin{matrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{matrix}");
 /// ```
 ///
 /// or simply
@@ -50,10 +50,10 @@ use nalgebra::{Dim, Matrix, RawStorage};
 /// let m = matrix!(
 ///     1,2,3,4;
 ///     5,6,7,8;
-/// 9,10,11,12;
+///     9,10,11,12;
 /// );
 /// PlainMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}");
+/// assert_eq!(s, r"\begin{matrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{matrix}");
 /// ```
 ///
 /// # Notes
@@ -97,7 +97,7 @@ pub trait LatexFormatter<I> {
     ///     9,10,11,12;
     /// );
     /// PlainMatrixFormatter::write_latex(&mut s, &m).unwrap();
-    /// assert_eq!(s, r"\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}");
+    /// assert_eq!(s, r"\begin{matrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{matrix}");
     /// ```
     ///
     /// # Errors
@@ -185,6 +185,7 @@ pub trait LatexFormatter<I> {
 /// );
 /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
 /// let ls = LinSys::new(m, vec_of_unknowns);
+/// 
 /// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
 /// stdout().write_all(s.as_bytes()).unwrap();
 /// "#, config);
@@ -328,7 +329,7 @@ pub trait EvcxrOutputFormatter<I> {
 ///     9,10,11,12;
 /// );
 /// PlainMatrixContentsFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"1&2&3&4\\5&6&7&8\\9&10&11&12");
+/// assert_eq!(s, r"$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$");
 /// ```
 ///
 /// This type is the foundational block for many others matrix formatting types offered by the crate.
@@ -352,7 +353,7 @@ pub struct PlainMatrixContentsFormatter;
 ///    9,10,11,12;
 /// );
 /// PlainMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}");
+/// assert_eq!(s, r"\begin{matrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{matrix}");
 /// ```
 ///
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
@@ -373,7 +374,7 @@ pub struct PlainMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// ParenthesizedMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{pmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{pmatrix}");
+/// assert_eq!(s, r"\begin{pmatrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{pmatrix}");
 /// ```
 ///
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
@@ -394,7 +395,7 @@ pub struct ParenthesizedMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// BracketedMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{bmatrix}");
+/// assert_eq!(s, r"\begin{bmatrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{bmatrix}");
 /// ```
 ///
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
@@ -415,7 +416,7 @@ pub struct BracketedMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// BracedMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{Bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Bmatrix}");
+/// assert_eq!(s, r"\begin{Bmatrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{Bmatrix}");
 /// ```
 ///
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
@@ -436,7 +437,7 @@ pub struct BracedMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// VBarDelimitedMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{vmatrix}");
+/// assert_eq!(s, r"\begin{vmatrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{vmatrix}");
 /// ```
 ///
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
@@ -457,7 +458,7 @@ pub struct VBarDelimitedMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// DoubleVBarDelimitedMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{Vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Vmatrix}");
+/// assert_eq!(s, r"\begin{Vmatrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{Vmatrix}");
 /// ```
 ///
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
@@ -476,7 +477,7 @@ where
 
         for i in 0..nrows {
             for j in 0..ncols {
-                dest.write_fmt(format_args!("{}", m[(i, j)]))?;
+                dest.write_fmt(format_args!("${}$", m[(i, j)]))?;
                 if j != ncols - 1 {
                     dest.write_str("&")?;
                 }

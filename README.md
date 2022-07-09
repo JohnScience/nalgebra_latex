@@ -21,7 +21,7 @@ On top of that, the crate offers feature-gated support for [`nalgebra_linsys`] a
 		9,10,11,12;
 	);
 	PlainMatrixFormatter::write_latex(&mut s, &m).unwrap();
-	assert_eq!(s, r"\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}");
+	assert_eq!(s, r"\begin{matrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{matrix}");
 ```
 
 ## What is [`nalgebra`]?
