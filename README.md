@@ -6,7 +6,7 @@
 The crate provides several robust formatters for [`nalgebra::Matrix`] as well as
 several LaTeX environments for customization.
 
-On top of that, the crate offers feature-gated support for [`nalgebra_linsys`].
+On top of that, the crate offers feature-gated support for [`nalgebra_linsys`] and [`evcxr`].
 
 ## Example
 
@@ -79,6 +79,7 @@ LaTeX is a language for typesetting documents, especially scientific papers, and
 [what is latex]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 [`nalgebra::Matrix`]: https://docs.rs/nalgebra/latest/nalgebra/base/struct.Matrix.html
 [`nalgebra_linsys`]: https://crates.io/crates/nalgebra_linsys
+[`evcxr`]: https://github.com/google/evcxr
 
 # License
 

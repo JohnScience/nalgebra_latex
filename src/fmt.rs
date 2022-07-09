@@ -113,6 +113,206 @@ pub trait LatexFormatter<I> {
     fn write_latex<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
 }
 
+/// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of
+/// [`evcxr`]-supported output.
+///
+/// # Example for [Jupyter Notebook] with [`evcxr` kernel]
+///
+/// ```ignore
+/// :dep execute_evcxr = { version = "0.1.0" }
+/// 
+/// use execute_evcxr::{execute_evcxr, Config};
+/// 
+/// let config = Config { verbose: false, ..Default::default() };
+/// execute_evcxr(r#"
+/// :dep nalgebra = "0.31.0"
+/// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+/// 
+/// use nalgebra::{matrix, Const};
+/// use nalgebra_latex::{
+///     lin_sys::{
+///         LinSys,
+///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+///         numbering::Numbering,
+///         fmt::CasesLinSysFormatter,
+///     },
+///     fmt::EvcxrOutputFormatter,
+/// };
+/// use std::io::{stdout, Write};
+/// 
+/// let mut s = String::new();
+/// let m = matrix!(
+///     1,2,3;
+///     4,5,6;
+///     7,8,9;
+/// );
+/// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+/// let ls = LinSys::new(m, vec_of_unknowns);
+/// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+/// stdout().write_all(s.as_bytes()).unwrap();
+/// "#, config);
+/// ```
+/// # Example for Rust project
+/// 
+/// ```
+/// extern crate execute_evcxr;
+/// 
+/// use execute_evcxr::{execute_evcxr, Config};
+/// 
+/// fn main() {
+///     let config = Config { ..Config::default() };
+///     execute_evcxr(r#"
+/// :dep nalgebra = "0.31.0"
+/// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+/// 
+/// use nalgebra::{matrix, Const};
+/// use nalgebra_latex::{
+///     lin_sys::{
+///         LinSys,
+///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+///         numbering::Numbering,
+///         fmt::CasesLinSysFormatter,
+///     },
+///     fmt::EvcxrOutputFormatter,
+/// };
+/// use std::io::{stdout, Write};
+/// 
+/// let mut s = String::new();
+/// let m = matrix!(
+///     1,2,3;
+///     4,5,6;
+///     7,8,9;
+/// );
+/// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+/// let ls = LinSys::new(m, vec_of_unknowns);
+/// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+/// stdout().write_all(s.as_bytes()).unwrap();
+/// "#, config);
+/// }
+/// ```
+///
+/// # Notes
+///
+/// * *At the moment of writing, all supplied type-parameters for the type-parameter `I` are parameterized
+/// types of generic type [`nalegebra::Matrix`].*
+///
+/// [`evcxr`]: https://github.com/google/evcxr
+/// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
+/// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
+/// [`nalegebra::Matrix`]: https://docs.rs/nalgebra/latest/nalgebra/base/struct.Matrix.html
+#[cfg(feature = "evcxr")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
+pub trait EvcxrOutputFormatter<I> {
+    /// Writes the value of type `&I` in the form of [`evcxr`]-supported output into the given "writer", i.e.
+    /// the destination that implements the [`Write`] trait.
+    ///
+    /// # Generic parameters
+    ///
+    /// `W` - type parameter of the destination, expected to implement the [`Write`] trait.
+    ///
+    /// *Note: one notable implementor of [`Write`] trait is [`String`].*
+    ///
+    /// # Arguments
+    ///
+    /// `dest` - destination into which the [`evcxr`]-supported output should be written.
+    ///
+    /// `input` - value of type `&I` to be formatted as [`evcxr`]-supported output.
+    ///
+    /// # Returns
+    ///
+    /// [`Result`]`<(), `[`core::fmt::Error`]`>` - [`Result::Ok`] if the [`evcxr`]-supported output was successfully
+    /// written to the destination and [`Result::Err`] otherwise.
+    ///
+    /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
+    ///
+    /// ```ignore
+    /// :dep execute_evcxr = { version = "0.1.0" }
+    /// 
+    /// use execute_evcxr::{execute_evcxr, Config};
+    /// 
+    /// let config = Config { verbose: false, ..Default::default() };
+    /// execute_evcxr(r#"
+    /// :dep nalgebra = "0.31.0"
+    /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+    /// 
+    /// use nalgebra::{matrix, Const};
+    /// use nalgebra_latex::{
+    ///     lin_sys::{
+    ///         LinSys,
+    ///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+    ///         numbering::Numbering,
+    ///         fmt::CasesLinSysFormatter,
+    ///     },
+    ///     fmt::EvcxrOutputFormatter,
+    /// };
+    /// use std::io::{stdout, Write};
+    /// 
+    /// let mut s = String::new();
+    /// let m = matrix!(
+    ///     1,2,3;
+    ///     4,5,6;
+    ///     7,8,9;
+    /// );
+    /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+    /// let ls = LinSys::new(m, vec_of_unknowns);
+    /// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+    /// stdout().write_all(s.as_bytes()).unwrap();
+    /// "#, config);
+    /// ```
+    /// # Example for Rust project
+    /// 
+    /// ```
+    /// extern crate execute_evcxr;
+    /// 
+    /// use execute_evcxr::{execute_evcxr, Config};
+    /// 
+    /// fn main() {
+    ///     let config = Config { ..Config::default() };
+    ///     execute_evcxr(r#"
+    /// :dep nalgebra = "0.31.0"
+    /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+    /// 
+    /// use nalgebra::{matrix, Const};
+    /// use nalgebra_latex::{
+    ///     lin_sys::{
+    ///         LinSys,
+    ///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+    ///         numbering::Numbering,
+    ///         fmt::CasesLinSysFormatter,
+    ///     },
+    ///     fmt::EvcxrOutputFormatter,
+    /// };
+    /// use std::io::{stdout, Write};
+    /// 
+    /// let mut s = String::new();
+    /// let m = matrix!(
+    ///     1,2,3;
+    ///     4,5,6;
+    ///     7,8,9;
+    /// );
+    /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+    /// let ls = LinSys::new(m, vec_of_unknowns);
+    /// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+    /// stdout().write_all(s.as_bytes()).unwrap();
+    /// "#, config);
+    /// }
+    /// ```    
+    ///
+    /// # Errors
+    ///
+    /// If the formatting process fails, the error must be returned as the [`Result::Err`] variant of the result
+    /// of the method.
+    ///
+    /// # Notes
+    ///
+    /// * *Implicitly, panics are not meant to happen.*
+    ///
+    /// [`evcxr`]: https://github.com/google/evcxr
+    /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
+    /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
+    fn write_evcxr_output<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
+}
+
 /// Plain ["environment"]-agnostic [LaTeX] formatter for matrices' contents, e.g. `1&2&3&4\\5&6&7&8`.
 ///
 /// # Example
@@ -313,3 +513,15 @@ decl_matrix_formatter!(BracketedMatrixFormatter for BracketedMatrixEnvironment);
 decl_matrix_formatter!(BracedMatrixFormatter for BracedMatrixEnvironment);
 decl_matrix_formatter!(VBarDelimitedMatrixFormatter for VBarDelimitedMatrixEnvironment);
 decl_matrix_formatter!(DoubleVBarDelimitedMatrixFormatter for DoubleVBarDelimitedMatrixEnvironment);
+
+#[cfg(feature = "evcxr")]
+impl<I,T> EvcxrOutputFormatter<I> for T
+where
+    T: LatexFormatter<I>
+{
+    fn write_evcxr_output<W: Write>(dest: &mut W, i: &I) -> Result<(), Error> {
+        dest.write_str("EVCXR_BEGIN_CONTENT text/markdown\n")?;
+        T::write_latex(dest, i)?;
+        dest.write_str("\nEVCXR_END_CONTENT\n")
+    }
+}
