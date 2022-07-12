@@ -13,7 +13,7 @@
 //! variant, and [`NumberingTy`] will be a deprecated alias for [`Numbering`].
 //!
 //! You can also choose to use the `adt_const_params` crate feature to enable the unstable Rust feature-namesake.
-//! 
+//!
 //! Note that because the doc is generated with `--all-features`, [`NumberingTy`] and [`Numbering`]
 //! are re-exported from [`adt_const_params`]. With `adt_const_params` disabled, the aforementioned types
 //! will be re-exported from [`workaround`] instead.
@@ -35,7 +35,7 @@ mod workaround;
 
 #[cfg(feature = "adt_const_params")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "adt_const_params")))]
-pub use adt_const_params::{NumberingTy, Numbering};
+pub use adt_const_params::{Numbering, NumberingTy};
 #[cfg(not(feature = "adt_const_params"))]
 #[cfg_attr(doc_cfg, doc(cfg(not(feature = "adt_const_params"))))]
-pub use workaround::{NumberingTy, Numbering};
+pub use workaround::{Numbering, NumberingTy};

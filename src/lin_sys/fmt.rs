@@ -42,7 +42,7 @@ use nalgebra::{Dim, RawStorage};
 /// );
 /// let ls = LinSys::new(m, vec_of_unknowns);
 /// PlainLinSysFormatter::write_latex(&mut s, &ls).unwrap();
-/// assert_eq!(s, r"$1x_{1}+2x_{2}+3x_{3}$\\$4x_{1}+5x_{2}+6x_{3}$\\$7x_{1}+8x_{2}+9x_{3}$");
+/// assert_eq!(s, r"1x_{1}+2x_{2}+3x_{3}\\4x_{1}+5x_{2}+6x_{3}\\7x_{1}+8x_{2}+9x_{3}");
 /// ```
 ///
 /// # Notes
@@ -77,7 +77,6 @@ where
         let nrows = input.matrix.nrows();
         let ncols = input.matrix.ncols();
         for i in 0..nrows {
-            write!(dest, "$")?;
             for j in 0..ncols {
                 write!(dest, "{}", input.matrix[(i, j)])?;
                 unsafe { input.unknowns.write_latex_for_ith_unchecked(dest, j) }?;
@@ -85,7 +84,6 @@ where
                     write!(dest, "+")?;
                 }
             }
-            write!(dest, "$")?;
             if i != nrows - 1 {
                 write!(dest, r"\\")?;
             }

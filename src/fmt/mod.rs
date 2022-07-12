@@ -12,13 +12,28 @@
 //!
 //! [`amsmath`]: https://ctan.org/pkg/amsmath?lang=en
 //! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
-use crate::env::{
-    BracedMatrixEnvironment, BracketedMatrixEnvironment, DoubleVBarDelimitedMatrixEnvironment,
-    LatexEnvironment, ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
-    VBarDelimitedMatrixEnvironment,
+
+mod impl_latex_formatter;
+mod impl_unchecked_latex_formatter;
+mod impl_write_as_latex;
+
+use crate::{
+    env::{
+        BracedMatrixEnvironment, BracketedMatrixEnvironment, DoubleVBarDelimitedMatrixEnvironment,
+        LatexEnvironment, ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
+        VBarDelimitedMatrixEnvironment,
+    },
+    latex_modes::LatexMode,
 };
-use core::fmt::{Display, Error, Write};
+use core::fmt::{Error, Write};
 use nalgebra::{Dim, Matrix, RawStorage};
+
+pub trait WriteAsLatex<M>
+where
+    M: LatexMode,
+{
+    fn write_as_latex<W: Write>(&self, dest: &mut W) -> Result<(), core::fmt::Error>;
+}
 
 /// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of [LaTeX] strings.
 ///
@@ -63,7 +78,7 @@ use nalgebra::{Dim, Matrix, RawStorage};
 ///
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 /// [`nalegebra::Matrix`]: https://docs.rs/nalgebra/latest/nalgebra/base/struct.Matrix.html
-pub trait LatexFormatter<I> {
+pub trait UncheckedLatexFormatter<I> {
     /// Writes the value of type `&I` in the form of [LaTeX] string into the given "writer", i.e.
     /// the destination that implements the [`Write`] trait.
     ///
@@ -110,6 +125,14 @@ pub trait LatexFormatter<I> {
     /// * *Implicitly, panics are not meant to happen.*
     ///
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+    unsafe fn write_latex_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
+}
+
+pub trait LatexFormatter<InitialMode, OutputMode, I>
+where
+    InitialMode: LatexMode,
+    OutputMode: LatexMode,
+{
     fn write_latex<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
 }
 
@@ -120,14 +143,14 @@ pub trait LatexFormatter<I> {
 ///
 /// ```ignore
 /// :dep execute_evcxr = { version = "0.1.0" }
-/// 
+///
 /// use execute_evcxr::{execute_evcxr, Config};
-/// 
+///
 /// let config = Config { verbose: false, ..Default::default() };
 /// execute_evcxr(r#"
 /// :dep nalgebra = "0.31.0"
 /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
-/// 
+///
 /// use nalgebra::{matrix, Const};
 /// use nalgebra_latex::{
 ///     lin_sys::{
@@ -139,7 +162,7 @@ pub trait LatexFormatter<I> {
 ///     fmt::EvcxrOutputFormatter,
 /// };
 /// use std::io::{stdout, Write};
-/// 
+///
 /// let mut s = String::new();
 /// let m = matrix!(
 ///     1,2,3;
@@ -153,18 +176,18 @@ pub trait LatexFormatter<I> {
 /// "#, config);
 /// ```
 /// # Example for Rust project
-/// 
+///
 /// ```
 /// extern crate execute_evcxr;
-/// 
+///
 /// use execute_evcxr::{execute_evcxr, Config};
-/// 
+///
 /// fn main() {
 ///     let config = Config { ..Config::default() };
 ///     execute_evcxr(r#"
 /// :dep nalgebra = "0.31.0"
 /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
-/// 
+///
 /// use nalgebra::{matrix, Const};
 /// use nalgebra_latex::{
 ///     lin_sys::{
@@ -176,7 +199,7 @@ pub trait LatexFormatter<I> {
 ///     fmt::EvcxrOutputFormatter,
 /// };
 /// use std::io::{stdout, Write};
-/// 
+///
 /// let mut s = String::new();
 /// let m = matrix!(
 ///     1,2,3;
@@ -185,7 +208,7 @@ pub trait LatexFormatter<I> {
 /// );
 /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
 /// let ls = LinSys::new(m, vec_of_unknowns);
-/// 
+///
 /// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
 /// stdout().write_all(s.as_bytes()).unwrap();
 /// "#, config);
@@ -228,14 +251,14 @@ pub trait EvcxrOutputFormatter<I> {
     ///
     /// ```ignore
     /// :dep execute_evcxr = { version = "0.1.0" }
-    /// 
+    ///
     /// use execute_evcxr::{execute_evcxr, Config};
-    /// 
+    ///
     /// let config = Config { verbose: false, ..Default::default() };
     /// execute_evcxr(r#"
     /// :dep nalgebra = "0.31.0"
     /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
-    /// 
+    ///
     /// use nalgebra::{matrix, Const};
     /// use nalgebra_latex::{
     ///     lin_sys::{
@@ -247,7 +270,7 @@ pub trait EvcxrOutputFormatter<I> {
     ///     fmt::EvcxrOutputFormatter,
     /// };
     /// use std::io::{stdout, Write};
-    /// 
+    ///
     /// let mut s = String::new();
     /// let m = matrix!(
     ///     1,2,3;
@@ -261,18 +284,18 @@ pub trait EvcxrOutputFormatter<I> {
     /// "#, config);
     /// ```
     /// # Example for Rust project
-    /// 
+    ///
     /// ```
     /// extern crate execute_evcxr;
-    /// 
+    ///
     /// use execute_evcxr::{execute_evcxr, Config};
-    /// 
+    ///
     /// fn main() {
     ///     let config = Config { ..Config::default() };
     ///     execute_evcxr(r#"
     /// :dep nalgebra = "0.31.0"
     /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
-    /// 
+    ///
     /// use nalgebra::{matrix, Const};
     /// use nalgebra_latex::{
     ///     lin_sys::{
@@ -284,7 +307,7 @@ pub trait EvcxrOutputFormatter<I> {
     ///     fmt::EvcxrOutputFormatter,
     /// };
     /// use std::io::{stdout, Write};
-    /// 
+    ///
     /// let mut s = String::new();
     /// let m = matrix!(
     ///     1,2,3;
@@ -311,7 +334,7 @@ pub trait EvcxrOutputFormatter<I> {
     /// [`evcxr`]: https://github.com/google/evcxr
     /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
     /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
-    fn write_evcxr_output<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
+    fn write_evcxr_output_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
 }
 
 /// Plain ["environment"]-agnostic [LaTeX] formatter for matrices' contents, e.g. `1&2&3&4\\5&6&7&8`.
@@ -464,63 +487,12 @@ pub struct VBarDelimitedMatrixFormatter;
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
 pub struct DoubleVBarDelimitedMatrixFormatter;
 
-impl<T, R, C, S> LatexFormatter<Matrix<T, R, C, S>> for PlainMatrixContentsFormatter
-where
-    T: Display,
-    R: Dim,
-    C: Dim,
-    S: RawStorage<T, R, C>,
-{
-    fn write_latex<W: Write>(dest: &mut W, m: &Matrix<T, R, C, S>) -> Result<(), Error> {
-        let nrows = m.nrows();
-        let ncols = m.ncols();
-
-        for i in 0..nrows {
-            for j in 0..ncols {
-                dest.write_fmt(format_args!("${}$", m[(i, j)]))?;
-                if j != ncols - 1 {
-                    dest.write_str("&")?;
-                }
-            }
-            if i != nrows - 1 {
-                dest.write_str(r"\\")?;
-            }
-        }
-        Ok(())
-    }
-}
-
-macro_rules! decl_matrix_formatter {
-    ($formatter:ident for $environment:ident) => {
-        impl<T, R, C, S> LatexFormatter<Matrix<T, R, C, S>> for $formatter
-        where
-            T: Display,
-            R: Dim,
-            C: Dim,
-            S: RawStorage<T, R, C>,
-        {
-            fn write_latex<W: Write>(dest: &mut W, m: &Matrix<T, R, C, S>) -> Result<(), Error> {
-                <$environment>::write_opening_tag(dest)?;
-                PlainMatrixContentsFormatter::write_latex(dest, m)?;
-                <$environment>::write_closing_tag(dest)
-            }
-        }
-    };
-}
-
-decl_matrix_formatter!(PlainMatrixFormatter for PlainMatrixEnvironment);
-decl_matrix_formatter!(ParenthesizedMatrixFormatter for ParenthesizedMatrixEnvironment);
-decl_matrix_formatter!(BracketedMatrixFormatter for BracketedMatrixEnvironment);
-decl_matrix_formatter!(BracedMatrixFormatter for BracedMatrixEnvironment);
-decl_matrix_formatter!(VBarDelimitedMatrixFormatter for VBarDelimitedMatrixEnvironment);
-decl_matrix_formatter!(DoubleVBarDelimitedMatrixFormatter for DoubleVBarDelimitedMatrixEnvironment);
-
 #[cfg(feature = "evcxr")]
-impl<I,T> EvcxrOutputFormatter<I> for T
+impl<I, T> EvcxrOutputFormatter<I> for T
 where
-    T: LatexFormatter<I>
+    T: UncheckedLatexFormatter<I>,
 {
-    fn write_evcxr_output<W: Write>(dest: &mut W, i: &I) -> Result<(), Error> {
+    fn write_evcxr_output_unchecked<W: Write>(dest: &mut W, i: &I) -> Result<(), Error> {
         dest.write_str("EVCXR_BEGIN_CONTENT text/markdown\n")?;
         T::write_latex(dest, i)?;
         dest.write_str("\nEVCXR_END_CONTENT\n")

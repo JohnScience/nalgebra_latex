@@ -5,6 +5,7 @@
 
 pub mod env;
 pub mod fmt;
+pub mod latex_modes;
 #[cfg(feature = "lin_sys")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
 pub mod lin_sys;
