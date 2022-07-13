@@ -11,17 +11,24 @@ On top of that, the crate offers feature-gated support for [`nalgebra_linsys`] a
 ## Example
 
 ```rust
-	use nalgebra::matrix;
-	use nalgebra_latex::fmt::{PlainMatrixFormatter, LatexFormatter};
+use nalgebra::matrix;
+use nalgebra_latex::{
+	fmt::{PlainMatrixFormatter, LatexFormatter},
+	latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
+};
 
-	let mut s = String::new();
-	let m = matrix!(
-		1,2,3,4;
-		5,6,7,8;
-		9,10,11,12;
-	);
-	PlainMatrixFormatter::write_latex(&mut s, &m).unwrap();
-	assert_eq!(s, r"\begin{matrix}$1$&$2$&$3$&$4$\\$5$&$6$&$7$&$8$\\$9$&$10$&$11$&$12$\end{matrix}");
+let mut s = String::new();
+let m = matrix!(
+	1,2,3,4;
+	5,6,7,8;
+	9,10,11,12;
+);
+
+<PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
+s.clear();
+<PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+assert_eq!(s, r"$$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$$");
 ```
 
 ## What is [`nalgebra`]?

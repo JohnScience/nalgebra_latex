@@ -99,6 +99,7 @@ use core::fmt::{Error, Write};
 /// assert_eq!(s, r"$\begin{mymatrix}1&2\\3&4\end{mymatrix}$");
 /// s.clear();
 /// <MyMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// assert_eq!(s, r"$$\begin{mymatrix}1&2\\3&4\end{mymatrix}$$");
 /// ```
 ///
 /// # Notes
