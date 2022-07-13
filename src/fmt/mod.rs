@@ -27,6 +27,16 @@ use crate::{
 };
 use core::fmt::{Error, Write};
 
+pub fn write_latex<F,IM,OM,W,I>(dest: &mut W, input: &I) -> Result<(), core::fmt::Error>
+where
+    F: LatexFormatter<IM,OM,I>,
+    IM: LatexMode,
+    OM: LatexMode,
+    W: core::fmt::Write
+{
+    F::write_latex(dest, input)
+}
+
 pub trait WriteAsLatex<M>
 where
     M: LatexMode,
@@ -41,7 +51,7 @@ where
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{PlainMatrixFormatter, LatexFormatter},
+///     fmt::{write_latex, PlainMatrixFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
@@ -52,10 +62,10 @@ where
 ///     9,10,11,12;
 /// );
 /// 
-/// <PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
 /// s.clear();
-/// <PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<PlainMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$$");
 /// ```
 ///
@@ -92,7 +102,7 @@ pub trait UncheckedLatexFormatter<I> {
     /// ```
     /// use nalgebra::matrix;
     /// use nalgebra_latex::{
-    ///     fmt::{PlainMatrixFormatter, LatexFormatter},
+    ///     fmt::{write_latex, PlainMatrixFormatter, LatexFormatter},
     ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
     /// };
     ///
@@ -103,10 +113,10 @@ pub trait UncheckedLatexFormatter<I> {
     ///     9,10,11,12;
     /// );
     /// 
-    /// <PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+    /// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
     /// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
     /// s.clear();
-    /// <PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+    /// write_latex::<PlainMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
     /// assert_eq!(s, r"$$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$$");
     /// ```
     ///
@@ -339,7 +349,7 @@ pub trait EvcxrOutputFormatter<I> {
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{PlainMatrixContentsFormatter, LatexFormatter},
+///     fmt::{write_latex, PlainMatrixContentsFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode},
 /// };
 ///
@@ -349,10 +359,11 @@ pub trait EvcxrOutputFormatter<I> {
 ///     5,6,7,8;
 ///     9,10,11,12;
 /// );
-/// <PlainMatrixContentsFormatter as LatexFormatter<InlineMathMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// 
+/// write_latex::<PlainMatrixContentsFormatter,InlineMathMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"1&2&3&4\\5&6&7&8\\9&10&11&12");
 /// s.clear();
-/// <PlainMatrixContentsFormatter as LatexFormatter<DisplayMathMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<PlainMatrixContentsFormatter,DisplayMathMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"1&2&3&4\\5&6&7&8\\9&10&11&12");
 /// ```
 ///
@@ -369,7 +380,7 @@ pub struct PlainMatrixContentsFormatter;
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{PlainMatrixFormatter, LatexFormatter},
+///     fmt::{write_latex, PlainMatrixFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
@@ -379,10 +390,11 @@ pub struct PlainMatrixContentsFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// <PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// 
+/// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
 /// s.clear();
-/// <PlainMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<PlainMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$$");
 /// ```
 ///
@@ -396,7 +408,7 @@ pub struct PlainMatrixFormatter;
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{ParenthesizedMatrixFormatter, LatexFormatter},
+///     fmt::{write_latex, ParenthesizedMatrixFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
@@ -407,10 +419,10 @@ pub struct PlainMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// 
-/// <ParenthesizedMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<ParenthesizedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{pmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{pmatrix}$");
 /// s.clear();
-/// <ParenthesizedMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<ParenthesizedMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{pmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{pmatrix}$$");
 /// ```
 ///
@@ -424,7 +436,7 @@ pub struct ParenthesizedMatrixFormatter;
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{BracketedMatrixFormatter, LatexFormatter},
+///     fmt::{write_latex, BracketedMatrixFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
@@ -434,10 +446,10 @@ pub struct ParenthesizedMatrixFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// <BracketedMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<BracketedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{bmatrix}$");
 /// s.clear();
-/// <BracketedMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<BracketedMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{bmatrix}$$");
 /// ```
 ///
@@ -451,7 +463,7 @@ pub struct BracketedMatrixFormatter;
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{BracedMatrixFormatter, LatexFormatter},
+///     fmt::{write_latex, BracedMatrixFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
@@ -462,10 +474,10 @@ pub struct BracketedMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// 
-/// <BracedMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<BracedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{Bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Bmatrix}$");
 /// s.clear();
-/// <BracedMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<BracedMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{Bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Bmatrix}$$");
 /// ```
 ///
@@ -479,7 +491,7 @@ pub struct BracedMatrixFormatter;
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{VBarDelimitedMatrixFormatter, LatexFormatter},
+///     fmt::{write_latex, VBarDelimitedMatrixFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
@@ -490,10 +502,10 @@ pub struct BracedMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// 
-/// <VBarDelimitedMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<VBarDelimitedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{vmatrix}$");
 /// s.clear();
-/// <VBarDelimitedMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<VBarDelimitedMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{vmatrix}$$");
 /// ```
 ///
@@ -507,7 +519,7 @@ pub struct VBarDelimitedMatrixFormatter;
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-///     fmt::{DoubleVBarDelimitedMatrixFormatter, LatexFormatter},
+///     fmt::{write_latex, DoubleVBarDelimitedMatrixFormatter, LatexFormatter},
 ///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
@@ -518,10 +530,10 @@ pub struct VBarDelimitedMatrixFormatter;
 ///    9,10,11,12;
 /// );
 /// 
-/// <DoubleVBarDelimitedMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<DoubleVBarDelimitedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{Vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Vmatrix}$");
 /// s.clear();
-/// <DoubleVBarDelimitedMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// write_latex::<DoubleVBarDelimitedMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{Vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Vmatrix}$$");
 /// ```
 ///
