@@ -2,7 +2,9 @@
 // http://www.personal.ceu.hu/tex/modes.htm
 
 macro_rules! decl_latex_modes {
-    ($(category:$cat:ident(trait $cat_trait:ident, enum $cat_enum:ident) { $(mode:$mode:ident),+ }),+) => {
+    ($(category:$cat:ident(trait $cat_trait:ident, enum $cat_enum:ident) {
+        $(mode:$mode:ident),+ 
+    }),+) => {
         #[derive(PartialEq, Eq)]
         pub enum LatexModeCategory {
             $(
@@ -56,6 +58,15 @@ macro_rules! decl_latex_modes {
             }
         }
 
+        pub trait CategoryEnumVariantExt<CE> {
+            const CATEGORY_ENUM_VARIANT: CE;
+        }
+
+        pub trait ControlSeqDelimited {
+            fn write_opening_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error>;
+            fn write_closing_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error>;
+        }
+
         $(
             pub trait $cat_trait: LatexMode {
                 fn category_enum(&self) -> $cat_enum;
@@ -95,6 +106,10 @@ macro_rules! decl_latex_modes {
                     const CATEGORIZED_KIND: CategorizedLatexModeKind = CategorizedLatexModeKind::$cat($cat_enum::$mode);
                 }
 
+                impl CategoryEnumVariantExt<$cat_enum> for $mode {
+                    const CATEGORY_ENUM_VARIANT: $cat_enum = $cat_enum::$mode;
+                }
+
                 impl $cat_trait for $mode {
                     fn category_enum(&self) -> $cat_enum {
                         $cat_enum::$mode
@@ -102,6 +117,24 @@ macro_rules! decl_latex_modes {
                 }
             )+
         )+
+
+        impl ControlSeqDelimited for InlineMathMode {
+            fn write_opening_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
+                w.write_char('$')
+            }
+            fn write_closing_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
+                w.write_char('$')
+            }
+        }
+
+        impl ControlSeqDelimited for DisplayMathMode {
+            fn write_opening_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
+                w.write_str("$$")
+            }
+            fn write_closing_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
+                w.write_str("$$")
+            }
+        }
     };
 }
 

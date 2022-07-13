@@ -11,7 +11,7 @@ use crate::{
         LatexEnvironment, ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
         VBarDelimitedMatrixEnvironment,
     },
-    latex_modes::{MathLatexMode, CategorizedLatexModeKindExt, CategorizedLatexModeKind},
+    latex_modes::{MathLatexMode, CategorizedLatexModeKindExt, CategorizedLatexModeKind, CategoryEnumVariantExt, MathLatexModeKind, ControlSeqDelimited},
 };
 
 use core::{
@@ -21,7 +21,7 @@ use core::{
 impl<IM, OM, T, R, C, S> LatexFormatter<IM, OM, Matrix<T, R, C, S>> for PlainMatrixContentsFormatter
 where
     IM: CategorizedLatexModeKindExt,
-    OM: MathLatexMode + CategorizedLatexModeKindExt,
+    OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,
     T: WriteAsLatex<OM>,
     R: Dim,
     C: Dim,
@@ -29,23 +29,25 @@ where
 {
     // Note: the implementation is nearly identical to the implementation of UncheckedLatexFormatter
     fn write_latex<W: Write>(dest: &mut W, m: &Matrix<T, R, C, S>) -> Result<(), Error> {
+        use CategorizedLatexModeKind::*;
+        let is_delimiting_required = match IM::CATEGORIZED_KIND {
+            eq if eq == Math(OM::CATEGORY_ENUM_VARIANT) => {
+                Ok(false)
+            },
+            Math(_different_math_mode_kind) => { Err(Error::default()) },
+            _ => { Ok(true) }
+        }?;
+
         let nrows = m.nrows();
         let ncols = m.ncols();
 
+        if is_delimiting_required {
+            OM::write_opening_control_seq(dest)?
+        };
+
         for i in 0..nrows {
             for j in 0..ncols {
-                match IM::CATEGORIZED_KIND {
-                    eq if eq == OM::CATEGORIZED_KIND => {
-                        <T as WriteAsLatex<OM>>::write_as_latex(&m[(i, j)], dest)
-                    },
-                    CategorizedLatexModeKind::Math(_) => {
-                        Err(Error::default())
-                    },
-                    // the author doesn't know enough about latex modes to be sure the following is correct
-                    _ => {
-                        todo!()
-                    }
-                }?;
+                <T as WriteAsLatex<OM>>::write_as_latex(&m[(i, j)], dest)?;
                 if j != ncols - 1 {
                     dest.write_str("&")?;
                 }
@@ -54,6 +56,9 @@ where
                 dest.write_str(r"\\")?;
             }
         }
+        if is_delimiting_required {
+            OM::write_closing_control_seq(dest)?
+        };
         Ok(())
     }
 }
