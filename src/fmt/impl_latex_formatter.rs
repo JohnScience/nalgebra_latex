@@ -18,36 +18,22 @@ use core::{
     fmt::{Error, Write},
 };
 
-impl<IM, OM, T, R, C, S> LatexFormatter<IM, OM, Matrix<T, R, C, S>> for PlainMatrixContentsFormatter
+impl<M, T, R, C, S> LatexFormatter<M, M, Matrix<T, R, C, S>> for PlainMatrixContentsFormatter
 where
-    IM: CategorizedLatexModeKindExt,
-    OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,
-    T: WriteAsLatex<OM>,
+    M: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
+    T: core::fmt::Display + WriteAsLatex<M>,
     R: Dim,
     C: Dim,
     S: RawStorage<T, R, C>,
 {
     // Note: the implementation is nearly identical to the implementation of UncheckedLatexFormatter
     fn write_latex<W: Write>(dest: &mut W, m: &Matrix<T, R, C, S>) -> Result<(), Error> {
-        use CategorizedLatexModeKind::*;
-        let is_delimiting_required = match IM::CATEGORIZED_KIND {
-            eq if eq == Math(OM::CATEGORY_ENUM_VARIANT) => {
-                Ok(false)
-            },
-            Math(_different_math_mode_kind) => { Err(Error::default()) },
-            _ => { Ok(true) }
-        }?;
-
         let nrows = m.nrows();
         let ncols = m.ncols();
 
-        if is_delimiting_required {
-            OM::write_opening_control_seq(dest)?
-        };
-
         for i in 0..nrows {
             for j in 0..ncols {
-                <T as WriteAsLatex<OM>>::write_as_latex(&m[(i, j)], dest)?;
+                <T as WriteAsLatex<M>>::write_as_latex(&m[(i, j)], dest)?;
                 if j != ncols - 1 {
                     dest.write_str("&")?;
                 }
@@ -56,9 +42,6 @@ where
                 dest.write_str(r"\\")?;
             }
         }
-        if is_delimiting_required {
-            OM::write_closing_control_seq(dest)?
-        };
         Ok(())
     }
 }

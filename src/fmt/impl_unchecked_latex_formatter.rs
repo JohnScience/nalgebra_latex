@@ -29,7 +29,7 @@ where
 
         for i in 0..nrows {
             for j in 0..ncols {
-                dest.write_fmt(format_args!("${}$", m[(i, j)]))?;
+                dest.write_fmt(format_args!("{}", m[(i, j)]))?;
                 if j != ncols - 1 {
                     dest.write_str("&")?;
                 }
