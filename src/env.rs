@@ -37,7 +37,18 @@ use core::fmt::{Error, Write};
 /// use nalgebra::{Matrix, RawStorage, Dim, Matrix2};
 /// use nalgebra_latex::{
 ///     env::LatexEnvironment,
-///     fmt::{LatexFormatter, PlainMatrixContentsFormatter},
+///     fmt::{LatexFormatter, PlainMatrixContentsFormatter, WriteAsLatex},
+///     latex_modes::{
+///         InnerParagraphMode,
+///         InlineMathMode,
+///         DisplayMathMode,
+///         CategorizedLatexModeKindExt,
+///         CategorizedLatexModeKind,
+///         MathLatexMode, 
+///         CategoryEnumVariantExt, 
+///         MathLatexModeKind,
+///         ControlSeqDelimited,
+///     },
 /// };
 ///
 /// use core::fmt::{Write, Error, Display};
@@ -52,26 +63,42 @@ use core::fmt::{Error, Write};
 ///    }
 /// }
 ///
-/// impl<T,R,C,S> LatexFormatter<Matrix<T,R,C,S>> for MyMatrixFormatter
+/// impl<IM,OM,T,R,C,S> LatexFormatter<IM,OM,Matrix<T,R,C,S>> for MyMatrixFormatter
 /// where
-///     T: Display,
+///     IM: CategorizedLatexModeKindExt,
+///     OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,
+///     T: WriteAsLatex<OM>,
 ///     R: Dim,
 ///     C: Dim,
 ///     S: RawStorage<T, R, C>,
 /// {
 ///     fn write_latex<W: Write>(dest: &mut W, m: &Matrix<T,R,C,S>) -> Result<(), Error> {
+///         use CategorizedLatexModeKind::*;
+///         let is_delimiting_required = match IM::CATEGORIZED_KIND {
+///             eq if eq == Math(OM::CATEGORY_ENUM_VARIANT) => Ok(false),
+///             Math(_) => Err(Error),
+///             _ => Ok(true),
+///         }?;
+///         if is_delimiting_required {
+///             OM::write_opening_control_seq(dest)?;
+///         };
 ///         MyMatrixEnvironment::write_opening_tag(dest)?;
 ///         PlainMatrixContentsFormatter::write_latex(dest, m)?;
-///         MyMatrixEnvironment::write_closing_tag(dest)
+///         MyMatrixEnvironment::write_closing_tag(dest)?;
+///         if is_delimiting_required {
+///             OM::write_closing_control_seq(dest)?;
+///         };
+///         Ok(())
 ///     }
 /// }
 ///
 /// let mut s = String::new();
 /// let m = Matrix2::new(1, 2, 3, 4);
 ///
-/// MyMatrixFormatter::write_latex(&mut s, &m).unwrap();
-/// assert_eq!(s, r"\begin{mymatrix}$1$&$2$\\$3$&$4$\end{mymatrix}");
-///
+/// <MyMatrixFormatter as LatexFormatter<InnerParagraphMode,InlineMathMode,_>>::write_latex(&mut s, &m).unwrap();
+/// assert_eq!(s, r"$\begin{mymatrix}1&2\\3&4\end{mymatrix}$");
+/// s.clear();
+/// <MyMatrixFormatter as LatexFormatter<InnerParagraphMode,DisplayMathMode,_>>::write_latex(&mut s, &m).unwrap();
 /// ```
 ///
 /// # Notes

@@ -3,7 +3,7 @@
 
 macro_rules! decl_latex_modes {
     ($(category:$cat:ident(trait $cat_trait:ident, enum $cat_enum:ident) {
-        $(mode:$mode:ident),+ 
+        $(mode:$mode:ident),+
     }),+) => {
         #[derive(PartialEq, Eq)]
         pub enum LatexModeCategory {
@@ -43,7 +43,7 @@ macro_rules! decl_latex_modes {
                 }
             }
         }
-        
+
         pub trait LatexModeKindExt: LatexMode {
             const KIND: LatexModeKind;
         }

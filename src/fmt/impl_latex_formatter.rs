@@ -11,17 +11,18 @@ use crate::{
         LatexEnvironment, ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
         VBarDelimitedMatrixEnvironment,
     },
-    latex_modes::{MathLatexMode, CategorizedLatexModeKindExt, CategorizedLatexModeKind, CategoryEnumVariantExt, MathLatexModeKind, ControlSeqDelimited},
+    latex_modes::{
+        CategorizedLatexModeKind, CategorizedLatexModeKindExt, CategoryEnumVariantExt,
+        ControlSeqDelimited, MathLatexMode, MathLatexModeKind,
+    },
 };
 
-use core::{
-    fmt::{Error, Write},
-};
+use core::fmt::{Error, Write};
 
 impl<M, T, R, C, S> LatexFormatter<M, M, Matrix<T, R, C, S>> for PlainMatrixContentsFormatter
 where
     M: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
-    T: core::fmt::Display + WriteAsLatex<M>,
+    T: WriteAsLatex<M>,
     R: Dim,
     C: Dim,
     S: RawStorage<T, R, C>,
@@ -48,19 +49,32 @@ where
 
 macro_rules! decl_matrix_formatter {
     ($formatter:ident for $environment:ident) => {
-        impl<M, T, R, C, S> LatexFormatter<M, M, Matrix<T, R, C, S>> for $formatter
+        impl<IM, OM, T, R, C, S> LatexFormatter<IM, OM, Matrix<T, R, C, S>> for $formatter
         where
-            M: MathLatexMode,
-            T: WriteAsLatex<M>,
+            IM: CategorizedLatexModeKindExt,
+            OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,
+            T: WriteAsLatex<OM>,
             R: Dim,
             C: Dim,
             S: RawStorage<T, R, C>,
         {
             fn write_latex<W: Write>(dest: &mut W, m: &Matrix<T, R, C, S>) -> Result<(), Error> {
-                todo!()
-                // <$environment>::write_opening_tag(dest)?;
-                // PlainMatrixContentsFormatter::write_latex(dest, m)?;
-                // <$environment>::write_closing_tag(dest)
+                use CategorizedLatexModeKind::*;
+                let is_delimiting_required = match IM::CATEGORIZED_KIND {
+                    eq if eq == Math(OM::CATEGORY_ENUM_VARIANT) => Ok(false),
+                    Math(_) => Err(Error),
+                    _ => Ok(true),
+                }?;
+                if is_delimiting_required {
+                    OM::write_opening_control_seq(dest)?;
+                };
+                <$environment>::write_opening_tag(dest)?;
+                PlainMatrixContentsFormatter::write_latex(dest, m)?;
+                <$environment>::write_closing_tag(dest)?;
+                if is_delimiting_required {
+                    OM::write_closing_control_seq(dest)?;
+                };
+                Ok(())
             }
         }
     };

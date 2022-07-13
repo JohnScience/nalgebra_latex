@@ -20,13 +20,12 @@ mod impl_write_as_latex;
 use crate::{
     env::{
         BracedMatrixEnvironment, BracketedMatrixEnvironment, DoubleVBarDelimitedMatrixEnvironment,
-        LatexEnvironment, ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
+        ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
         VBarDelimitedMatrixEnvironment,
     },
     latex_modes::LatexMode,
 };
 use core::fmt::{Error, Write};
-use nalgebra::{Dim, Matrix, RawStorage};
 
 pub trait WriteAsLatex<M>
 where
