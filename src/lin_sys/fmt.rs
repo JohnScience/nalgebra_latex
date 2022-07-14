@@ -13,7 +13,7 @@ use crate::{
 use nalgebra::{Dim, RawStorage};
 
 /// Plain ["environment"]-agnostic [LaTeX] formatter for [linear systems], e.g.
-/// `$1x_{0}$+$0x_{1}$+$3x_{2}$\\$4x_{0}$+$5x_{1}$+$6x_{2}$`.
+/// `1x_{0}+0x_{1}+3x_{2}\\4x_{0}+5x_{1}+6x_{2}`.
 ///
 /// # Example
 ///

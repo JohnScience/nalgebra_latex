@@ -1,6 +1,6 @@
 [package]
 name = "nalgebra_latex"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Dmitrii Demenev <demenev.dmitriy1@gmail.com>"]
 edition = "2021"
 rust-version = "1.56.1" # https://github.com/foresterre/cargo-msrv
@@ -42,7 +42,7 @@ thiserror = { version = "1.0.31", optional = true }
 either = { version = "1.6.1", optional = true }
 
 [dev-dependencies]
-execute_evcxr = "0.1.0"
+execute_evcxr = "0.1.1"
 
 [features]
 lin_sys = ["nalgebra_linsys", "thiserror", "either"]
