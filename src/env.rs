@@ -110,7 +110,7 @@ use core::fmt::{Error, Write};
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 /// [environments]: https://www.overleaf.com/learn/latex/Environments
 pub trait LatexEnvironment {
-    /// Writes the name of the [LaTeX] [environment] to the given "writer", i.e. destination that
+    /// Writes the name of the [LaTeX] [environment] (e.g. `matrix`) to the given "writer", i.e. destination that
     /// implements the [`Write`] trait.
     ///
     /// # Generic parameters
