@@ -3,12 +3,12 @@
 //! [`nalgebra_linsys`]: https://crates.io/crates/nalgebra_linsys
 //! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 
-use core::fmt::{Display, Write};
+use core::fmt::Write;
 
 use crate::{
     env::LatexEnvironment,
-    fmt::LatexFormatter,
-    lin_sys::{env::CasesEnvironment, unknowns::Unknowns, LinSys},
+    fmt::{LatexFormatter, write_latex, WriteAsLatex},
+    lin_sys::{env::CasesEnvironment, unknowns::Unknowns, LinSys}, latex_modes::{CategorizedLatexModeKindExt, MathLatexMode, CategoryEnumVariantExt, MathLatexModeKind, ControlSeqDelimited, CategorizedLatexModeKind},
 };
 use nalgebra::{Dim, RawStorage};
 
@@ -26,7 +26,8 @@ use nalgebra::{Dim, RawStorage};
 ///         numbering::Numbering,
 ///         fmt::PlainLinSysFormatter,
 ///     },
-///     fmt::LatexFormatter,
+///     fmt::{write_latex, LatexFormatter},
+///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
 /// let mut s = String::new();
@@ -41,7 +42,7 @@ use nalgebra::{Dim, RawStorage};
 ///     Dynamic::new(3)
 /// );
 /// let ls = LinSys::new(m, vec_of_unknowns);
-/// PlainLinSysFormatter::write_latex(&mut s, &ls).unwrap();
+/// write_latex::<PlainLinSysFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &ls).unwrap();
 /// assert_eq!(s, r"1x_{1}+2x_{2}+3x_{3}\\4x_{1}+5x_{2}+6x_{3}\\7x_{1}+8x_{2}+9x_{3}");
 /// ```
 ///
@@ -62,9 +63,11 @@ pub struct PlainLinSysFormatter;
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
 pub struct CasesLinSysFormatter;
 
-impl<T, R, C, S, U> LatexFormatter<LinSys<T, R, C, S, U>> for PlainLinSysFormatter
+impl<IM,OM,T,R,C,S,U> LatexFormatter<IM,OM,LinSys<T, R, C, S, U>> for PlainLinSysFormatter
 where
-    T: Display,
+    IM: CategorizedLatexModeKindExt,
+    OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
+    T: WriteAsLatex<OM>,
     R: Dim,
     C: Dim,
     S: RawStorage<T, R, C>,
@@ -78,8 +81,8 @@ where
         let ncols = input.matrix.ncols();
         for i in 0..nrows {
             for j in 0..ncols {
-                write!(dest, "{}", input.matrix[(i, j)])?;
-                unsafe { input.unknowns.write_latex_for_ith_unchecked(dest, j) }?;
+                input.matrix[(i, j)].write_as_latex(dest)?;
+                unsafe { input.unknowns.write_latex_for_ith_unchecked::<OM,_>(dest, j) }?;
                 if j != ncols - 1 {
                     write!(dest, "+")?;
                 }
@@ -92,9 +95,11 @@ where
     }
 }
 
-impl<T, R, C, S, U> LatexFormatter<LinSys<T, R, C, S, U>> for CasesLinSysFormatter
+impl<IM,OM,T,R,C,S,U> LatexFormatter<IM,OM,LinSys<T, R, C, S, U>> for CasesLinSysFormatter
 where
-    T: Display,
+    IM: CategorizedLatexModeKindExt,
+    OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited + CategorizedLatexModeKindExt,
+    T: WriteAsLatex<OM>,
     R: Dim,
     C: Dim,
     S: RawStorage<T, R, C>,
@@ -104,8 +109,21 @@ where
         dest: &mut W,
         input: &LinSys<T, R, C, S, U>,
     ) -> Result<(), core::fmt::Error> {
+        use CategorizedLatexModeKind::*;
+        let is_delimiting_required = match IM::CATEGORIZED_KIND {
+            eq if eq == Math(OM::CATEGORY_ENUM_VARIANT) => Ok(false),
+            Math(_) => Err(core::fmt::Error),
+            _ => Ok(true),
+        }?;
+        if is_delimiting_required {
+            OM::write_opening_control_seq(dest)?;
+        }
         CasesEnvironment::write_opening_tag(dest)?;
-        PlainLinSysFormatter::write_latex(dest, input)?;
-        CasesEnvironment::write_closing_tag(dest)
+        write_latex::<PlainLinSysFormatter,OM,OM,_,_>(dest, input)?;
+        CasesEnvironment::write_closing_tag(dest)?;
+        if is_delimiting_required {
+            OM::write_closing_control_seq(dest)?;
+        }
+        Ok(())
     }
 }

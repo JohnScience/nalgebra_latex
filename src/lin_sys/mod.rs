@@ -21,7 +21,8 @@ pub mod unknowns;
 ///         numbering::Numbering,
 ///         fmt::CasesLinSysFormatter,
 ///     },
-///     fmt::LatexFormatter,
+///     fmt::{write_latex, LatexFormatter},
+///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
 ///
 /// let mut s = String::new();
@@ -32,8 +33,8 @@ pub mod unknowns;
 /// );
 /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
 /// let ls = LinSys::new(m, vec_of_unknowns);
-/// CasesLinSysFormatter::write_latex(&mut s, &ls).unwrap();
-/// assert_eq!(s, r"\begin{cases}$1x_{1}+2x_{2}+3x_{3}$\\$4x_{1}+5x_{2}+6x_{3}$\\$7x_{1}+8x_{2}+9x_{3}$\end{cases}");
+/// write_latex::<CasesLinSysFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &ls).unwrap();
+/// assert_eq!(s, r"$\begin{cases}1x_{1}+2x_{2}+3x_{3}\\4x_{1}+5x_{2}+6x_{3}\\7x_{1}+8x_{2}+9x_{3}\end{cases}$");
 /// ```
 ///
 /// [linear system]: https://en.wikipedia.org/wiki/System_of_linear_equations
