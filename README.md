@@ -72,6 +72,10 @@ LaTeX is a language for typesetting documents, especially scientific papers, and
 
 ![tex output](https://i.imgur.com/xptzo3h.jpg)
 
+## Warning
+
+At the moment of writing some of the documentation is outdated due to recent overhaul.
+
 ## Resources on LaTeX
 
 * [LaTeX documentation on Overleaf](https://www.overleaf.com/learn)

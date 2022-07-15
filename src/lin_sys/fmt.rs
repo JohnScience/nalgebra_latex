@@ -7,8 +7,12 @@ use core::fmt::Write;
 
 use crate::{
     env::LatexEnvironment,
-    fmt::{LatexFormatter, write_latex, WriteAsLatex},
-    lin_sys::{env::CasesEnvironment, unknowns::Unknowns, LinSys}, latex_modes::{CategorizedLatexModeKindExt, MathLatexMode, CategoryEnumVariantExt, MathLatexModeKind, ControlSeqDelimited, CategorizedLatexModeKind},
+    fmt::{write_latex, LatexFormatter, WriteAsLatex},
+    latex_modes::{
+        CategorizedLatexModeKind, CategorizedLatexModeKindExt, CategoryEnumVariantExt,
+        ControlSeqDelimited, MathLatexMode, MathLatexModeKind,
+    },
+    lin_sys::{env::CasesEnvironment, unknowns::Unknowns, LinSys},
 };
 use nalgebra::{Dim, RawStorage};
 
@@ -63,7 +67,7 @@ pub struct PlainLinSysFormatter;
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
 pub struct CasesLinSysFormatter;
 
-impl<IM,OM,T,R,C,S,U> LatexFormatter<IM,OM,LinSys<T, R, C, S, U>> for PlainLinSysFormatter
+impl<IM, OM, T, R, C, S, U> LatexFormatter<IM, OM, LinSys<T, R, C, S, U>> for PlainLinSysFormatter
 where
     IM: CategorizedLatexModeKindExt,
     OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
@@ -82,7 +86,11 @@ where
         for i in 0..nrows {
             for j in 0..ncols {
                 input.matrix[(i, j)].write_as_latex(dest)?;
-                unsafe { input.unknowns.write_latex_for_ith_unchecked::<OM,_>(dest, j) }?;
+                unsafe {
+                    input
+                        .unknowns
+                        .write_latex_for_ith_unchecked::<OM, _>(dest, j)
+                }?;
                 if j != ncols - 1 {
                     write!(dest, "+")?;
                 }
@@ -95,10 +103,13 @@ where
     }
 }
 
-impl<IM,OM,T,R,C,S,U> LatexFormatter<IM,OM,LinSys<T, R, C, S, U>> for CasesLinSysFormatter
+impl<IM, OM, T, R, C, S, U> LatexFormatter<IM, OM, LinSys<T, R, C, S, U>> for CasesLinSysFormatter
 where
     IM: CategorizedLatexModeKindExt,
-    OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited + CategorizedLatexModeKindExt,
+    OM: MathLatexMode
+        + CategoryEnumVariantExt<MathLatexModeKind>
+        + ControlSeqDelimited
+        + CategorizedLatexModeKindExt,
     T: WriteAsLatex<OM>,
     R: Dim,
     C: Dim,
@@ -119,7 +130,7 @@ where
             OM::write_opening_control_seq(dest)?;
         }
         CasesEnvironment::write_opening_tag(dest)?;
-        write_latex::<PlainLinSysFormatter,OM,OM,_,_>(dest, input)?;
+        write_latex::<PlainLinSysFormatter, OM, OM, _, _>(dest, input)?;
         CasesEnvironment::write_closing_tag(dest)?;
         if is_delimiting_required {
             OM::write_closing_control_seq(dest)?;

@@ -4,7 +4,10 @@ use crate::latex_modes::LatexMode;
 macro_rules! impl_for_prim_numeric {
     ($t:ident) => {
         impl<M: LatexMode> WriteAsLatex<M> for $t {
-            fn write_as_latex<W: core::fmt::Write>(&self, dest: &mut W) -> Result<(), core::fmt::Error> {
+            fn write_as_latex<W: core::fmt::Write>(
+                &self,
+                dest: &mut W,
+            ) -> Result<(), core::fmt::Error> {
                 write!(dest, "{}", self)
             }
         }

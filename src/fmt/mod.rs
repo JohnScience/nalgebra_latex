@@ -13,30 +13,30 @@
 //! [`amsmath`]: https://ctan.org/pkg/amsmath?lang=en
 //! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 
-mod impl_latex_formatter;
-mod impl_unchecked_latex_formatter;
-mod impl_write_as_latex;
-#[cfg(feature = "evcxr")]
-mod impl_unchecked_evcxr_output_formatter;
 #[cfg(feature = "evcxr")]
 mod impl_evcxr_output_formatter;
+mod impl_latex_formatter;
+mod impl_latex_formatter_quadruple;
+#[cfg(feature = "evcxr")]
+mod impl_unchecked_evcxr_output_formatter;
+mod impl_unchecked_latex_formatter;
+mod impl_write_as_latex;
 
 use crate::{
     env::{
         BracedMatrixEnvironment, BracketedMatrixEnvironment, DoubleVBarDelimitedMatrixEnvironment,
-        ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
-        VBarDelimitedMatrixEnvironment,
+        ParenthesizedMatrixEnvironment, PlainMatrixEnvironment, VBarDelimitedMatrixEnvironment,
     },
     latex_modes::LatexMode,
 };
 use core::fmt::{Error, Write};
 
-pub fn write_latex<F,IM,OM,W,I>(dest: &mut W, input: &I) -> Result<(), core::fmt::Error>
+pub fn write_latex<F, IM, OM, W, I>(dest: &mut W, input: &I) -> Result<(), core::fmt::Error>
 where
-    F: LatexFormatter<IM,OM,I>,
+    F: LatexFormatter<IM, OM, I>,
     IM: LatexMode,
     OM: LatexMode,
-    W: core::fmt::Write
+    W: core::fmt::Write,
 {
     F::write_latex(dest, input)
 }
@@ -69,7 +69,7 @@ pub trait WriteFormated<I> {
 ///     5,6,7,8;
 ///     9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
 /// s.clear();
@@ -120,7 +120,7 @@ pub trait UncheckedLatexFormatter<I> {
     ///     5,6,7,8;
     ///     9,10,11,12;
     /// );
-    /// 
+    ///
     /// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
     /// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
     /// s.clear();
@@ -139,6 +139,15 @@ pub trait UncheckedLatexFormatter<I> {
     ///
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
     unsafe fn write_latex_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
+}
+
+pub trait LatexFormatterQuadruple {
+    type Formatter;
+    type Input;
+    type InitialMode: LatexMode;
+    type OutputMode: LatexMode;
+
+    fn write_latex<W: Write>(dest: &mut W, input: &Self::Input) -> Result<(), Error>;
 }
 
 pub trait LatexFormatter<InitialMode, OutputMode, I>
@@ -347,7 +356,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     /// [`evcxr`]: https://github.com/google/evcxr
     /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
     /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
-    unsafe fn write_evcxr_output_unchecked<M,W>(dest: &mut W, input: &I) -> Result<(), Error>
+    unsafe fn write_evcxr_output_unchecked<M, W>(dest: &mut W, input: &I) -> Result<(), Error>
     where
         M: mime_typed::MimeStrExt,
         W: Write;
@@ -355,7 +364,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
 
 #[cfg(feature = "evcxr")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
-pub trait EvcxrOutputFormatter<M,I> {
+pub trait EvcxrOutputFormatter<M, I> {
     fn write_evcxr_output<W>(&self, dest: &mut W, input: &I) -> Result<(), Error>
     where
         M: mime_typed::MimeStrExt,
@@ -379,7 +388,7 @@ pub trait EvcxrOutputFormatter<M,I> {
 ///     5,6,7,8;
 ///     9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<PlainMatrixContentsFormatter,InlineMathMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"1&2&3&4\\5&6&7&8\\9&10&11&12");
 /// s.clear();
@@ -410,7 +419,7 @@ pub struct PlainMatrixContentsFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
 /// s.clear();
@@ -438,7 +447,7 @@ pub struct PlainMatrixFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<ParenthesizedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{pmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{pmatrix}$");
 /// s.clear();
@@ -493,7 +502,7 @@ pub struct BracketedMatrixFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<BracedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{Bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Bmatrix}$");
 /// s.clear();
@@ -521,7 +530,7 @@ pub struct BracedMatrixFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<VBarDelimitedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{vmatrix}$");
 /// s.clear();
@@ -549,7 +558,7 @@ pub struct VBarDelimitedMatrixFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<DoubleVBarDelimitedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{Vmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{Vmatrix}$");
 /// s.clear();

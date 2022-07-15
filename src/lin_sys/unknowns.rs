@@ -8,10 +8,15 @@
 //! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 //! [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations
 
-use crate::{lin_sys::{
-    err::OutOfBoundsError,
-    numbering::{Numbering, NumberingTy},
-}, latex_modes::{MathLatexMode, CategoryEnumVariantExt, MathLatexModeKind, CategorizedLatexModeKindExt}};
+use crate::{
+    latex_modes::{
+        CategorizedLatexModeKindExt, CategoryEnumVariantExt, MathLatexMode, MathLatexModeKind,
+    },
+    lin_sys::{
+        err::OutOfBoundsError,
+        numbering::{Numbering, NumberingTy},
+    },
+};
 use core::{fmt::Write, marker::PhantomData};
 use either::Either;
 use nalgebra::Dim;
@@ -40,7 +45,7 @@ pub trait Unknowns {
     /// be written upon success.
     ///
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
-    fn write_latex<IM,OM,W>(&self, dest: &mut W) -> Result<(), core::fmt::Error>
+    fn write_latex<IM, OM, W>(&self, dest: &mut W) -> Result<(), core::fmt::Error>
     where
         IM: CategorizedLatexModeKindExt,
         OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
@@ -82,7 +87,7 @@ pub trait Unknowns {
     ///
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
     /// [zero-based index]: https://en.wikipedia.org/wiki/Zero-based_numbering
-    unsafe fn write_latex_for_ith_unchecked<M,W>(
+    unsafe fn write_latex_for_ith_unchecked<M, W>(
         &self,
         dest: &mut W,
         zbi: usize,
@@ -116,18 +121,18 @@ pub trait Unknowns {
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
     /// [zero-based index]: https://en.wikipedia.org/wiki/Zero-based_numbering
     /// [dedicated issue]: https://github.com/JohnScience/nalgebra_latex/issues/1
-    fn write_latex_for_ith<M,W>(
+    fn write_latex_for_ith<M, W>(
         &self,
         dest: &mut W,
         zbi: usize,
     ) -> Result<(), Either<core::fmt::Error, OutOfBoundsError>>
     where
         M: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
-        W: Write
+        W: Write,
     {
         self.validate_idx(zbi).map_err(Either::Right)?;
         unsafe {
-            self.write_latex_for_ith_unchecked::<M,W>(dest, zbi)
+            self.write_latex_for_ith_unchecked::<M, W>(dest, zbi)
                 .map_err(Either::Left)
         }
     }
@@ -176,11 +181,11 @@ impl<L, const N: NumberingTy> SingleLetterBoldfaceVecOfUnknowns<L, N> {
     }
 }
 
-impl<L, const N: NumberingTy> Unknowns for SingleLetterBoldfaceVecOfUnknowns<L,N>
+impl<L, const N: NumberingTy> Unknowns for SingleLetterBoldfaceVecOfUnknowns<L, N>
 where
     L: Copy + Dim,
 {
-    fn write_latex<IM,OM,W>(&self, w: &mut W) -> Result<(), core::fmt::Error>
+    fn write_latex<IM, OM, W>(&self, w: &mut W) -> Result<(), core::fmt::Error>
     where
         IM: CategorizedLatexModeKindExt,
         OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
@@ -198,14 +203,14 @@ where
     }
 
     #[cfg_attr(not(feature = "adt_const_params"), allow(non_upper_case_globals))]
-    unsafe fn write_latex_for_ith_unchecked<M,W>(
+    unsafe fn write_latex_for_ith_unchecked<M, W>(
         &self,
         w: &mut W,
         zbi: usize,
     ) -> Result<(), core::fmt::Error>
     where
         M: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
-        W: Write
+        W: Write,
     {
         use Numbering::*;
 

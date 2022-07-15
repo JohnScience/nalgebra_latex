@@ -1,12 +1,12 @@
-use core::fmt::{Error, Write};
 use super::{UncheckedEvcxrOutputFormatter, WriteFormated};
+use core::fmt::{Error, Write};
 use mime_typed::MimeStrExt;
 
 impl<I, T> UncheckedEvcxrOutputFormatter<I> for T
 where
     T: WriteFormated<I>,
 {
-    unsafe fn write_evcxr_output_unchecked<M,W>(dest: &mut W, i: &I) -> Result<(), Error>
+    unsafe fn write_evcxr_output_unchecked<M, W>(dest: &mut W, i: &I) -> Result<(), Error>
     where
         M: MimeStrExt,
         W: Write,

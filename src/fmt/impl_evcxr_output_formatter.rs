@@ -1,16 +1,19 @@
-use crate::latex_modes::LatexMode;
+use mime_typed::evcxr_support::TextMarkdownUtf8;
+use crate::latex_modes::{InnerParagraphMode, DisplayMathMode};
 
-use super::{EvcxrOutputFormatter, LatexFormatter};
+use super::{EvcxrOutputFormatter, LatexFormatterQuadruple};
 
-impl<M,F,IM,OM,I> EvcxrOutputFormatter<M,I> for F
+impl<F,I> EvcxrOutputFormatter<TextMarkdownUtf8,I> for F
 where
-    M: mime_typed::MimeStrExt,
-    IM: LatexMode,
-    OM: LatexMode,
-    F: LatexFormatter<IM,OM,I>
+    (F,I,InnerParagraphMode,DisplayMathMode): LatexFormatterQuadruple<
+        Formatter = F,
+        Input = I,
+        InitialMode = InnerParagraphMode,
+        OutputMode = DisplayMathMode
+    >,
 {
     fn write_evcxr_output<W: core::fmt::Write>(&self, dest: &mut W, input: &I) -> Result<(), core::fmt::Error>
     {
-        todo!()
+        <(F,I,InnerParagraphMode,DisplayMathMode)>::write_latex(dest, input)
     }
 }
