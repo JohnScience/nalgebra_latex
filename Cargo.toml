@@ -44,6 +44,7 @@ mime_typed = { version = "0.1.6", optional = true }
 
 [dev-dependencies]
 execute_evcxr = "0.1.1"
+const_num_bigint = "0.2.1"
 
 [features]
 #default = ["evcxr", "lin_sys"]

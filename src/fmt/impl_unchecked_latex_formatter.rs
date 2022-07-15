@@ -56,6 +56,11 @@ macro_rules! decl_matrix_formatter {
                 m: &Matrix<T, R, C, S>,
             ) -> Result<(), Error> {
                 <$environment>::write_opening_tag(dest)?;
+                // The use of deprecated `write_latex_unchecked` is justified
+                // because the implementation of `write_latex_unchecked` for matrices
+                // via types-wrappers around unknown types is not applicable for the
+                // library as an upstream crate.
+                #[allow(deprecated)]
                 PlainMatrixContentsFormatter::write_latex_unchecked(dest, m)?;
                 <$environment>::write_closing_tag(dest)
             }

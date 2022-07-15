@@ -1,4 +1,5 @@
-//! A module offering a number of contents-aware matrix [LaTeX] formatters for [`nalgebra`].
+//! A module offering a number of contents-aware matrix [LaTeX] formatters for [`nalgebra`]
+//! as well as [`write_latex`] function to rule them all.
 //!
 //! At the moment of writing, it supports the environments from one of the most popular [LaTeX] packages,
 //! [`amsmath`]:
@@ -52,7 +53,113 @@ pub trait WriteFormated<I> {
     fn write_formated<W: Write>(dest: &mut W, input: &I) -> Result<(), core::fmt::Error>;
 }
 
-/// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of [LaTeX] strings.
+// TODO: provide a good example with an implementation via type-wrapper
+/// Implementers of the trait allow quick-and-dirty by-reference formatting of
+/// values of the type-parameter in the form, which is **assumed** to be a valid a [LaTeX]
+/// string.
+/// 
+/// # Bad example
+/// 
+/// ```
+/// use nalgebra::matrix;
+/// use nalgebra_latex::fmt::{ParenthesizedMatrixFormatter, UncheckedLatexFormatter};
+/// // The `const_num_bigint` crate does not have a first-class support for LaTeX formatting.
+/// use const_num_bigint::{BigUint, biguint};
+///
+/// 
+/// const A11 : &'static BigUint = biguint!("1");
+/// const A12 : &'static BigUint = biguint!("2");
+/// const A21 : &'static BigUint = biguint!("3");
+/// const A22 : &'static BigUint = biguint!("4");
+/// 
+/// let M = matrix![
+///    A11, A12;
+///    A21, A22;
+/// ];
+/// 
+/// let mut s = String::new();
+/// // In good code, unsafe blocks must *always* be commented.
+/// // They should explain why their use is safe
+/// // based on the `# Unsafety` block of the documentation.
+/// #[allow(deprecated)]
+/// unsafe { ParenthesizedMatrixFormatter::write_latex_unchecked(&mut s, &M) }.unwrap();
+/// assert_eq!(s, r"\begin{pmatrix}1&2\\3&4\end{pmatrix}");
+/// ```
+/// 
+/// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+pub trait UncheckedLatexFormatter<I> {
+    /// Writes the value of type `&I` in the form, which is **assumed** to be a [LaTeX] string
+    /// into the given "writer", i.e. the destination that implements the [`Write`] trait.
+    ///
+    /// # Generic parameters
+    ///
+    /// `W` - type parameter of the destination, expected to implement the [`Write`] trait.
+    ///
+    /// *Note: one notable implementor of [`Write`] trait is [`String`].*
+    ///
+    /// # Arguments
+    ///
+    /// `dest` - destination into which the formatted **presumable** [LaTeX] string should be written.
+    ///
+    /// `input` - value of type `&I` which is **assumed** to be formatted as [LaTeX] string.
+    ///
+    /// # Returns
+    ///
+    /// [`Result`]`<(), `[`core::fmt::Error`]`>` - [`Result::Ok`] if the formatted **presumable** [LaTeX]
+    /// string was successfully written to the destination and [`Result::Err`] if it wasn't.
+    /// 
+    /// # Bad example
+    /// 
+    /// ```
+    /// use nalgebra::matrix;
+    /// use nalgebra_latex::fmt::{ParenthesizedMatrixFormatter, UncheckedLatexFormatter};
+    /// // The `const_num_bigint` crate does not have a first-class support for LaTeX formatting.
+    /// use const_num_bigint::{BigUint, biguint};
+    ///
+    /// 
+    /// const A11 : &'static BigUint = biguint!("1");
+    /// const A12 : &'static BigUint = biguint!("2");
+    /// const A21 : &'static BigUint = biguint!("3");
+    /// const A22 : &'static BigUint = biguint!("4");
+    /// 
+    /// let M = matrix![
+    ///    A11, A12;
+    ///    A21, A22;
+    /// ];
+    /// 
+    /// let mut s = String::new();
+    /// // In good code, unsafe blocks must *always* be commented.
+    /// // They should explain why their use is safe
+    /// // based on the `# Unsafety` block of the documentation.
+    /// #[allow(deprecated)]
+    /// unsafe { ParenthesizedMatrixFormatter::write_latex_unchecked(&mut s, &M) }.unwrap();
+    /// assert_eq!(s, r"\begin{pmatrix}1&2\\3&4\end{pmatrix}");
+    /// ```
+    /// 
+    /// # Unsafety
+    /// 
+    /// This is unsafe because the caller must guarantee that the input will be formated as a valid [LaTeX] string.
+    /// 
+    /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+    #[deprecated(since = "0.1.0", note =
+"In case if you can't implement (a foreign for your crate) trait LatexFormatter on a
+foreign type `T` from another upstream crate, you can make a wrapper around `T` and
+implement LatexFormatter on the type-wrapper instead. For convenience, you can
+use [`delegate`](https://crates.io/crates/delegate) crate.")]
+    unsafe fn write_latex_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
+}
+
+pub trait LatexFormatterQuadruple {
+    type Formatter;
+    type Input;
+    type InitialMode: LatexMode;
+    type OutputMode: LatexMode;
+
+    fn write_latex<W: Write>(dest: &mut W, input: &Self::Input) -> Result<(), Error>;
+}
+
+/// Implementers of the trait allow by-reference formatting of values of type-parameter in the
+/// form of [LaTeX] strings.
 ///
 /// # Example
 ///
@@ -84,7 +191,11 @@ pub trait WriteFormated<I> {
 ///
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 /// [`nalegebra::Matrix`]: https://docs.rs/nalgebra/latest/nalgebra/base/struct.Matrix.html
-pub trait UncheckedLatexFormatter<I> {
+pub trait LatexFormatter<InitialMode, OutputMode, I>
+where
+    InitialMode: LatexMode,
+    OutputMode: LatexMode,
+{
     /// Writes the value of type `&I` in the form of [LaTeX] string into the given "writer", i.e.
     /// the destination that implements the [`Write`] trait.
     ///
@@ -138,23 +249,6 @@ pub trait UncheckedLatexFormatter<I> {
     /// * *Implicitly, panics are not meant to happen.*
     ///
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
-    unsafe fn write_latex_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
-}
-
-pub trait LatexFormatterQuadruple {
-    type Formatter;
-    type Input;
-    type InitialMode: LatexMode;
-    type OutputMode: LatexMode;
-
-    fn write_latex<W: Write>(dest: &mut W, input: &Self::Input) -> Result<(), Error>;
-}
-
-pub trait LatexFormatter<InitialMode, OutputMode, I>
-where
-    InitialMode: LatexMode,
-    OutputMode: LatexMode,
-{
     fn write_latex<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
 }
 
@@ -475,6 +569,7 @@ pub struct ParenthesizedMatrixFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
+/// 
 /// write_latex::<BracketedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{bmatrix}$");
 /// s.clear();

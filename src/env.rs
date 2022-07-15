@@ -116,6 +116,8 @@ pub trait LatexEnvironment {
     /// # Generic parameters
     ///
     /// `W` - generic type parameter of the destination, expected to implement the [`Write`] trait.
+    /// 
+    /// *Note: one notable implementor of [`Write`] trait is [`String`].*
     ///
     /// # Arguments
     ///
@@ -167,7 +169,7 @@ pub trait LatexEnvironment {
     /// ```
     ///
     /// *Note: The name of the environment is supplied via a function instead of an associated constant
-    /// because the function can be implemented on static string like "smallpbBvVmatrix" that would
+    /// because the function can be implemented on a static string like "smallpbBvVmatrix" that would
     /// be shared between different matrix environments. Such implementation may or may not have lighter
     /// memory footprint, better cache locality, and performance.*
     ///
@@ -182,6 +184,8 @@ pub trait LatexEnvironment {
     ///
     /// `W` - type parameter of the destination, expected to implement the [`Write`] trait.
     ///
+    /// *Note: one notable implementor of [`Write`] trait is [`String`].*
+    /// 
     /// # Arguments
     ///
     /// `dest` - destination into which the opening tag of the [LaTeX] [environment] should be written
@@ -216,6 +220,8 @@ pub trait LatexEnvironment {
     /// # Generic parameters
     ///
     /// `W` - type parameter of the destination, expected to implement the [`Write`] trait.
+    /// 
+    /// *Note: one notable implementor of [`Write`] trait is [`String`].*
     ///
     /// # Arguments
     ///
