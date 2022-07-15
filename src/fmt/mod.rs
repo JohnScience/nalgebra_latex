@@ -16,6 +16,10 @@
 mod impl_latex_formatter;
 mod impl_unchecked_latex_formatter;
 mod impl_write_as_latex;
+#[cfg(feature = "evcxr")]
+mod impl_unchecked_evcxr_output_formatter;
+#[cfg(feature = "evcxr")]
+mod impl_evcxr_output_formatter;
 
 use crate::{
     env::{
@@ -42,6 +46,10 @@ where
     M: LatexMode,
 {
     fn write_as_latex<W: Write>(&self, dest: &mut W) -> Result<(), core::fmt::Error>;
+}
+
+pub trait WriteFormated<I> {
+    fn write_formated<W: Write>(dest: &mut W, input: &I) -> Result<(), core::fmt::Error>;
 }
 
 /// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of [LaTeX] strings.
@@ -231,7 +239,7 @@ where
 /// [`nalegebra::Matrix`]: https://docs.rs/nalgebra/latest/nalgebra/base/struct.Matrix.html
 #[cfg(feature = "evcxr")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
-pub trait EvcxrOutputFormatter<I> {
+pub trait UncheckedEvcxrOutputFormatter<I> {
     /// Writes the value of type `&I` in the form of [`evcxr`]-supported output into the given "writer", i.e.
     /// the destination that implements the [`Write`] trait.
     ///
@@ -339,7 +347,19 @@ pub trait EvcxrOutputFormatter<I> {
     /// [`evcxr`]: https://github.com/google/evcxr
     /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
     /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
-    fn write_evcxr_output_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
+    unsafe fn write_evcxr_output_unchecked<M,W>(dest: &mut W, input: &I) -> Result<(), Error>
+    where
+        M: mime_typed::MimeStrExt,
+        W: Write;
+}
+
+#[cfg(feature = "evcxr")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
+pub trait EvcxrOutputFormatter<M,I> {
+    fn write_evcxr_output<W>(&self, dest: &mut W, input: &I) -> Result<(), Error>
+    where
+        M: mime_typed::MimeStrExt,
+        W: Write;
 }
 
 /// Plain ["environment"]-agnostic [LaTeX] formatter for matrices' contents, e.g. `1&2&3&4\\5&6&7&8`.
@@ -539,15 +559,3 @@ pub struct VBarDelimitedMatrixFormatter;
 ///
 /// [environment]: https://www.overleaf.com/learn/latex/Environments
 pub struct DoubleVBarDelimitedMatrixFormatter;
-
-#[cfg(feature = "evcxr")]
-impl<I, T> EvcxrOutputFormatter<I> for T
-where
-    T: UncheckedLatexFormatter<I>,
-{
-    fn write_evcxr_output_unchecked<W: Write>(dest: &mut W, i: &I) -> Result<(), Error> {
-        dest.write_str("EVCXR_BEGIN_CONTENT text/markdown\n")?;
-        T::write_latex(dest, i)?;
-        dest.write_str("\nEVCXR_END_CONTENT\n")
-    }
-}

@@ -40,14 +40,16 @@ nalgebra = "0.31.0"
 nalgebra_linsys = { version = "0.1.1", optional = true }
 thiserror = { version = "1.0.31", optional = true }
 either = { version = "1.6.1", optional = true }
+mime_typed = { version = "0.1.6", optional = true }
 
 [dev-dependencies]
 execute_evcxr = "0.1.1"
 
 [features]
+default = ["evcxr", "lin_sys"]
 lin_sys = ["nalgebra_linsys", "thiserror", "either"]
 nightly = ["adt_const_params"]
-evcxr = []
+evcxr = ["mime_typed", "mime_typed/evcxr_support"]
 adt_const_params = []
 
 [package.metadata.docs.rs]
