@@ -37,7 +37,13 @@ use core::fmt::{Error, Write};
 /// use nalgebra::{Matrix, RawStorage, Dim, Matrix2};
 /// use nalgebra_latex::{
 ///     env::LatexEnvironment,
-///     fmt::{LatexFormatter, PlainMatrixContentsFormatter, WriteAsLatex},
+///     fmt::{
+///         LatexFormatterQuadruple, 
+///         ZSTQuadruple, 
+///         LatexFormatter, 
+///         PlainMatrixContentsFormatter, 
+///         WriteAsLatex,
+///     },
 ///     latex_modes::{
 ///         InnerParagraphMode,
 ///         InlineMathMode,
@@ -62,8 +68,8 @@ use core::fmt::{Error, Write};
 ///       dest.write_str("mymatrix")
 ///    }
 /// }
-///
-/// impl<IM,OM,T,R,C,S> LatexFormatter<IM,OM,Matrix<T,R,C,S>> for MyMatrixFormatter
+/// 
+/// impl<IM,OM,T,R,C,S> LatexFormatterQuadruple for ZSTQuadruple<MyMatrixFormatter,Matrix<T, R, C, S>,IM,OM>
 /// where
 ///     IM: CategorizedLatexModeKindExt,
 ///     OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,

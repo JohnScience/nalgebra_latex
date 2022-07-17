@@ -23,6 +23,8 @@ mod impl_unchecked_evcxr_output_formatter;
 mod impl_unchecked_latex_formatter;
 mod impl_write_as_latex;
 
+use zst::ZST;
+
 use crate::{
     env::{
         BracedMatrixEnvironment, BracketedMatrixEnvironment, DoubleVBarDelimitedMatrixEnvironment,
@@ -149,7 +151,17 @@ use [`delegate`](https://crates.io/crates/delegate) crate.")]
     unsafe fn write_latex_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
 }
 
-pub trait LatexFormatterQuadruple {
+/// This type acts as a list of arbitrary types of length 4.
+/// 
+/// Construction of a tuple with types of unknown size is impossible.
+pub type ZSTQuadruple<Formatter, Input, InitialMode, OutputMode> = (
+    ZST<Formatter>,
+    ZST<Input>,
+    ZST<InitialMode>,
+    ZST<OutputMode>,
+);
+
+pub trait LatexFormatterQuadruple: Sized {
     type Formatter;
     type Input;
     type InitialMode: LatexMode;

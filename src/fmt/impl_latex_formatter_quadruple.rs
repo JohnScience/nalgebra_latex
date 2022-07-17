@@ -21,11 +21,11 @@ use crate::{
 use super::{
     BracedMatrixFormatter, BracketedMatrixFormatter, DoubleVBarDelimitedMatrixFormatter,
     LatexFormatterQuadruple, ParenthesizedMatrixFormatter, PlainMatrixContentsFormatter,
-    PlainMatrixFormatter, VBarDelimitedMatrixFormatter, WriteAsLatex,
+    PlainMatrixFormatter, VBarDelimitedMatrixFormatter, WriteAsLatex, ZSTQuadruple,
 };
 
 impl<M, T, R, C, S> LatexFormatterQuadruple
-    for (PlainMatrixContentsFormatter, Matrix<T, R, C, S>, M, M)
+    for ZSTQuadruple<PlainMatrixContentsFormatter,Matrix<T, R, C, S>,M,M>
 where
     M: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
     T: WriteAsLatex<M>,
@@ -60,7 +60,7 @@ where
 macro_rules! decl_matrix_formatter_quadruple {
     ($formatter:ident for $environment:ident) => {
         impl<IM, OM, T, R, C, S> LatexFormatterQuadruple
-            for ($formatter, Matrix<T, R, C, S>, IM, OM)
+            for ZSTQuadruple<$formatter,Matrix<T, R, C, S>,IM,OM>
         where
             IM: CategorizedLatexModeKindExt,
             OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,
@@ -85,7 +85,7 @@ macro_rules! decl_matrix_formatter_quadruple {
                     OM::write_opening_control_seq(dest)?;
                 };
                 <$environment>::write_opening_tag(dest)?;
-                <(PlainMatrixContentsFormatter,Matrix<T,R,C,S>,OM,OM)>::write_latex(dest, m)?;
+                ZSTQuadruple::<PlainMatrixContentsFormatter,Matrix<T,R,C,S>,OM,OM>::write_latex(dest, m)?;
                 <$environment>::write_closing_tag(dest)?;
                 if is_delimiting_required {
                     OM::write_closing_control_seq(dest)?;
