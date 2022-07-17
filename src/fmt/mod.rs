@@ -287,7 +287,7 @@ where
 /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
 ///
 /// ```ignore
-/// :dep execute_evcxr = { version = "0.1.0" }
+/// :dep execute_evcxr = { version = "0.1.1" }
 ///
 /// use execute_evcxr::{execute_evcxr, Config};
 ///
@@ -392,7 +392,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
     ///
     /// ```ignore
-    /// :dep execute_evcxr = { version = "0.1.0" }
+    /// :dep execute_evcxr = { version = "0.1.1" }
     ///
     /// use execute_evcxr::{execute_evcxr, Config};
     ///
@@ -498,7 +498,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
 /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
 /// 
 /// ```ignore
-/// :dep execute_evcxr = { version = "0.1.0" }
+/// :dep execute_evcxr = { version = "0.1.1" }
 ///
 /// use execute_evcxr::{execute_evcxr, Config};
 ///
@@ -583,7 +583,7 @@ pub trait EvcxrOutputFormatter<M, I> {
     /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
     /// 
     /// ```ignore
-    /// :dep execute_evcxr = { version = "0.1.0" }
+    /// :dep execute_evcxr = { version = "0.1.1" }
     ///
     /// use execute_evcxr::{execute_evcxr, Config};
     ///
