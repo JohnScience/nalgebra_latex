@@ -21,16 +21,16 @@
 //! [ADT]: https://en.wikipedia.org/wiki/Algebraic_data_type
 //! [unstable]: https://github.com/rust-lang/rust/issues/95174
 
-#[cfg(doc_cfg)]
-#[cfg_attr(doc_cfg, doc(cfg(doc_cfg)))]
+#[cfg(any(doc_cfg,doc))]
+#[cfg_attr(doc_cfg, doc(cfg(any(doc_cfg,doc))))]
 pub mod adt_const_params;
-#[cfg(doc_cfg)]
-#[cfg_attr(doc_cfg, doc(cfg(doc_cfg)))]
+#[cfg(any(doc_cfg,doc))]
+#[cfg_attr(doc_cfg, doc(cfg(any(doc_cfg,doc))))]
 pub mod workaround;
 
-#[cfg(not(doc_cfg))]
+#[cfg(not(any(doc_cfg,doc)))]
 mod adt_const_params;
-#[cfg(not(doc_cfg))]
+#[cfg(not(any(doc_cfg,doc)))]
 mod workaround;
 
 #[cfg(feature = "adt_const_params")]
