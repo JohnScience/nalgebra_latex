@@ -38,8 +38,6 @@ use core::fmt::{Error, Write};
 /// use nalgebra_latex::{
 ///     env::LatexEnvironment,
 ///     fmt::{
-///         LatexFormatterQuadruple, 
-///         ZSTQuadruple, 
 ///         LatexFormatter, 
 ///         PlainMatrixContentsFormatter, 
 ///         WriteAsLatex,
@@ -69,7 +67,7 @@ use core::fmt::{Error, Write};
 ///    }
 /// }
 /// 
-/// impl<IM,OM,T,R,C,S> LatexFormatterQuadruple for ZSTQuadruple<MyMatrixFormatter,Matrix<T, R, C, S>,IM,OM>
+/// impl<IM,OM,T,R,C,S> LatexFormatter<IM,OM,Matrix<T,R,C,S>> for MyMatrixFormatter
 /// where
 ///     IM: CategorizedLatexModeKindExt,
 ///     OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,
