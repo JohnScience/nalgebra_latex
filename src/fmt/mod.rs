@@ -282,7 +282,7 @@ where
 }
 
 /// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of
-/// [`evcxr`]-supported output.
+/// **supposedly** [`evcxr`]-supported output.
 ///
 /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
 ///
@@ -363,11 +363,6 @@ where
 /// }
 /// ```
 ///
-/// # Notes
-///
-/// * *At the moment of writing, all supplied type-parameters for the type-parameter `I` are parameterized
-/// types of generic type [`nalegebra::Matrix`].*
-///
 /// [`evcxr`]: https://github.com/google/evcxr
 /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
 /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
@@ -375,8 +370,8 @@ where
 #[cfg(feature = "evcxr")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
 pub trait UncheckedEvcxrOutputFormatter<I> {
-    /// Writes the value of type `&I` in the form of [`evcxr`]-supported output into the given "writer", i.e.
-    /// the destination that implements the [`Write`] trait.
+    /// Writes the value of type `&I` in the form of **supposedly** [`evcxr`]-supported output
+    /// into the given "writer", i.e. the destination that implements the [`Write`] trait.
     ///
     /// # Generic parameters
     ///
@@ -386,14 +381,14 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     ///
     /// # Arguments
     ///
-    /// `dest` - destination into which the [`evcxr`]-supported output should be written.
+    /// `dest` - destination into which the **supposedly** [`evcxr`]-supported output should be written.
     ///
-    /// `input` - value of type `&I` to be formatted as [`evcxr`]-supported output.
+    /// `input` - value of type `&I` to be formatted as **supposedly** [`evcxr`]-supported output.
     ///
     /// # Returns
     ///
-    /// [`Result`]`<(), `[`core::fmt::Error`]`>` - [`Result::Ok`] if the [`evcxr`]-supported output was successfully
-    /// written to the destination and [`Result::Err`] otherwise.
+    /// [`Result`]`<(), `[`core::fmt::Error`]`>` - [`Result::Ok`] if the **supposedly** [`evcxr`]-supported
+    /// output was successfully written to the destination and [`Result::Err`] otherwise.
     ///
     /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
     ///
@@ -584,6 +579,8 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
 #[cfg(feature = "evcxr")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
 pub trait EvcxrOutputFormatter<M, I> {
+    /// 
+    /// 
     /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
     /// 
     /// ```ignore
