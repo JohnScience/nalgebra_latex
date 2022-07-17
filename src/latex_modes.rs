@@ -1,3 +1,24 @@
+//! Module with types representing [LaTeX] modes and with traits of those types.
+//! 
+//! A bit outdated in terms of findings information about the modes is available
+//! in
+//! [this comment on the "Latex modes are difficult" issue][whining].
+//! 
+//! Ever since then, the author also found "The TeXbook" by Donald Knuth, which
+//! explains the modes in detail. However, Donald Knuth's book was written before
+//! LaTeX became a thing and it mentions only 6 modes and does not mention the
+//! subcases of the "paragraph" mode.
+//! 
+//! As opposed to [LaTeX], its subset supported in Markdown has only three modes.
+//! The current suggestion is to use
+//! 
+//! * [InnerParagraphMode] for the "paragraph" mode;
+//! * [DisplayMathMode] for the display math mode; and
+//! * [InlineMathMode] for the inline math mode.
+//! 
+//! [whining]: https://github.com/JohnScience/nalgebra_latex/issues/2#issuecomment-1181474307
+//! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
+
 // http://latexref.xyz/Modes.html
 // http://www.personal.ceu.hu/tex/modes.htm
 

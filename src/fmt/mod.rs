@@ -170,9 +170,23 @@ pub trait LatexFormatterQuadruple: Sized {
     fn write_latex<W: Write>(dest: &mut W, input: &Self::Input) -> Result<(), Error>;
 }
 
-/// Implementers of the trait allow by-reference formatting of values of type-parameter in the
+/// Implementers of the trait allow by-reference formatting of values in the
+/// specific to the given [initial-output LaTeX mode pair][crate::latex_modes]
 /// form of [LaTeX] strings.
 ///
+/// # Generic parameters
+/// 
+/// `I` - type parameter of the inputs. `input: &I` is one of the parameters when formatting.
+/// 
+/// `InitialMode` - type parameter representing [latex mode][crate::latex_modes] from which writing
+/// of the [LaTeX] string starts.
+/// 
+/// `OutputMode` - type parameter representing [latex mode][crate::latex_modes] in which writing
+/// of the [LaTeX] string should happen.
+/// 
+/// *Note: In many (if not all) cases, after the write the [LaTeX] machinery would proceed
+/// in the initial [latex mode][crate::latex_modes]*.
+/// 
 /// # Example
 ///
 /// ```
