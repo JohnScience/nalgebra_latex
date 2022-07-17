@@ -156,14 +156,15 @@ use [`delegate`](https://crates.io/crates/delegate) crate."
 /// This type acts as a list of arbitrary types of length 4.
 ///
 /// Construction of a tuple with types of unknown size is impossible.
-pub type ZSTQuadruple<Formatter, Input, InitialMode, OutputMode> = (
+pub(crate) type ZSTQuadruple<Formatter, Input, InitialMode, OutputMode> = (
     ZST<Formatter>,
     ZST<Input>,
     ZST<InitialMode>,
     ZST<OutputMode>,
 );
 
-pub trait LatexFormatterQuadruple: Sized {
+/// Check the impl module for more information.
+pub(crate) trait LatexFormatterQuadruple: Sized {
     type Formatter;
     type Input;
     type InitialMode: LatexMode;
