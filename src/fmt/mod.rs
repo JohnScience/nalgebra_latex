@@ -44,6 +44,9 @@ where
     F::write_latex(dest, input)
 }
 
+/// Its implementors can be written as [LaTeX] in the given [LaTeX mode][crate::latex_modes].
+/// 
+/// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 pub trait WriteAsLatex<M>
 where
     M: LatexMode,
@@ -374,6 +377,10 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     ///
     /// # Generic parameters
     ///
+    /// `M` - type parameter representing [MIME type] which must be supplied
+    /// to [`evcxr` kernel] for the the contents which are **assumed** to be valid
+    /// in the given [MIME type].
+    /// 
     /// `W` - type parameter of the destination, expected to implement the [`Write`] trait.
     ///
     /// *Note: one notable implementor of [`Write`] trait is [`String`].*
@@ -479,6 +486,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     /// [`evcxr`]: https://github.com/google/evcxr
     /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
     /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
+    /// [MIME type]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
     unsafe fn write_evcxr_output_unchecked<M, W>(dest: &mut W, input: &I) -> Result<(), Error>
     where
         M: mime_typed::MimeStrExt,
