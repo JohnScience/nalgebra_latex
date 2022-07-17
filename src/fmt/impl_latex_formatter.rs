@@ -1,9 +1,9 @@
 // The trait implementations are provided on per-formatter basis due to
 // the forward-compatibility issues caused by the generic implementation.
-// 
+//
 // Check the commit with the problematic code here:
 // https://github.com/JohnScience/nalgebra_latex/commit/ae0a2b67c8831b0b9f4da765b6354ab46e471088
-// 
+//
 // As far as the author understands, the problem can alternatively be resolved by using #[fundamental]
 // annotation on crate::fmt::ZSTQuadruple generic, which then should be a type-wrapper around tuple
 // of [zst::ZST]s instead of a type-alias for the tuple thereof; because tuples are always foreign

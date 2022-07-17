@@ -59,26 +59,26 @@ pub trait WriteFormated<I> {
 /// Implementers of the trait allow quick-and-dirty by-reference formatting of
 /// values of the type-parameter in the form, which is **assumed** to be a valid a [LaTeX]
 /// string.
-/// 
+///
 /// # Bad example
-/// 
+///
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::fmt::{ParenthesizedMatrixFormatter, UncheckedLatexFormatter};
 /// // The `const_num_bigint` crate does not have a first-class support for LaTeX formatting.
 /// use const_num_bigint::{BigUint, biguint};
 ///
-/// 
+///
 /// const A11 : &'static BigUint = biguint!("1");
 /// const A12 : &'static BigUint = biguint!("2");
 /// const A21 : &'static BigUint = biguint!("3");
 /// const A22 : &'static BigUint = biguint!("4");
-/// 
+///
 /// let M = matrix![
 ///    A11, A12;
 ///    A21, A22;
 /// ];
-/// 
+///
 /// let mut s = String::new();
 /// // In good code, unsafe blocks must *always* be commented.
 /// // They should explain why their use is safe
@@ -87,7 +87,7 @@ pub trait WriteFormated<I> {
 /// unsafe { ParenthesizedMatrixFormatter::write_latex_unchecked(&mut s, &M) }.unwrap();
 /// assert_eq!(s, r"\begin{pmatrix}1&2\\3&4\end{pmatrix}");
 /// ```
-/// 
+///
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 pub trait UncheckedLatexFormatter<I> {
     /// Writes the value of type `&I` in the form, which is **assumed** to be a [LaTeX] string
@@ -109,26 +109,26 @@ pub trait UncheckedLatexFormatter<I> {
     ///
     /// [`Result`]`<(), `[`core::fmt::Error`]`>` - [`Result::Ok`] if the formatted **presumable** [LaTeX]
     /// string was successfully written to the destination and [`Result::Err`] if it wasn't.
-    /// 
+    ///
     /// # Bad example
-    /// 
+    ///
     /// ```
     /// use nalgebra::matrix;
     /// use nalgebra_latex::fmt::{ParenthesizedMatrixFormatter, UncheckedLatexFormatter};
     /// // The `const_num_bigint` crate does not have a first-class support for LaTeX formatting.
     /// use const_num_bigint::{BigUint, biguint};
     ///
-    /// 
+    ///
     /// const A11 : &'static BigUint = biguint!("1");
     /// const A12 : &'static BigUint = biguint!("2");
     /// const A21 : &'static BigUint = biguint!("3");
     /// const A22 : &'static BigUint = biguint!("4");
-    /// 
+    ///
     /// let M = matrix![
     ///    A11, A12;
     ///    A21, A22;
     /// ];
-    /// 
+    ///
     /// let mut s = String::new();
     /// // In good code, unsafe blocks must *always* be commented.
     /// // They should explain why their use is safe
@@ -137,22 +137,24 @@ pub trait UncheckedLatexFormatter<I> {
     /// unsafe { ParenthesizedMatrixFormatter::write_latex_unchecked(&mut s, &M) }.unwrap();
     /// assert_eq!(s, r"\begin{pmatrix}1&2\\3&4\end{pmatrix}");
     /// ```
-    /// 
+    ///
     /// # Unsafety
-    /// 
+    ///
     /// This is unsafe because the caller must guarantee that the input will be formated as a valid [LaTeX] string.
-    /// 
+    ///
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
-    #[deprecated(since = "0.1.0", note =
-"In case if you can't implement (a foreign for your crate) trait LatexFormatter on a
+    #[deprecated(
+        since = "0.1.0",
+        note = "In case if you can't implement (a foreign for your crate) trait LatexFormatter on a
 foreign type `T` from another upstream crate, you can make a wrapper around `T` and
 implement LatexFormatter on the type-wrapper instead. For convenience, you can
-use [`delegate`](https://crates.io/crates/delegate) crate.")]
+use [`delegate`](https://crates.io/crates/delegate) crate."
+    )]
     unsafe fn write_latex_unchecked<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
 }
 
 /// This type acts as a list of arbitrary types of length 4.
-/// 
+///
 /// Construction of a tuple with types of unknown size is impossible.
 pub type ZSTQuadruple<Formatter, Input, InitialMode, OutputMode> = (
     ZST<Formatter>,
@@ -175,18 +177,18 @@ pub trait LatexFormatterQuadruple: Sized {
 /// form of [LaTeX] strings.
 ///
 /// # Generic parameters
-/// 
+///
 /// `I` - type parameter of the inputs. `input: &I` is one of the parameters when formatting.
-/// 
+///
 /// `InitialMode` - type parameter representing [latex mode][crate::latex_modes] from which writing
 /// of the [LaTeX] string starts.
-/// 
+///
 /// `OutputMode` - type parameter representing [latex mode][crate::latex_modes] in which writing
 /// of the [LaTeX] string should happen.
-/// 
+///
 /// *Note: In many (if not all) cases, after the write the [LaTeX] machinery would proceed
 /// in the initial [latex mode][crate::latex_modes]*.
-/// 
+///
 /// # Example
 ///
 /// ```
@@ -595,7 +597,7 @@ pub struct ParenthesizedMatrixFormatter;
 ///    5,6,7,8;
 ///    9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<BracketedMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{bmatrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{bmatrix}$");
 /// s.clear();

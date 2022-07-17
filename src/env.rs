@@ -38,8 +38,8 @@ use core::fmt::{Error, Write};
 /// use nalgebra_latex::{
 ///     env::LatexEnvironment,
 ///     fmt::{
-///         LatexFormatter, 
-///         PlainMatrixContentsFormatter, 
+///         LatexFormatter,
+///         PlainMatrixContentsFormatter,
 ///         WriteAsLatex,
 ///     },
 ///     latex_modes::{
@@ -66,7 +66,7 @@ use core::fmt::{Error, Write};
 ///       dest.write_str("mymatrix")
 ///    }
 /// }
-/// 
+///
 /// impl<IM,OM,T,R,C,S> LatexFormatter<IM,OM,Matrix<T,R,C,S>> for MyMatrixFormatter
 /// where
 ///     IM: CategorizedLatexModeKindExt,
@@ -120,7 +120,7 @@ pub trait LatexEnvironment {
     /// # Generic parameters
     ///
     /// `W` - generic type parameter of the destination, expected to implement the [`Write`] trait.
-    /// 
+    ///
     /// *Note: one notable implementor of [`Write`] trait is [`String`].*
     ///
     /// # Arguments
@@ -189,7 +189,7 @@ pub trait LatexEnvironment {
     /// `W` - type parameter of the destination, expected to implement the [`Write`] trait.
     ///
     /// *Note: one notable implementor of [`Write`] trait is [`String`].*
-    /// 
+    ///
     /// # Arguments
     ///
     /// `dest` - destination into which the opening tag of the [LaTeX] [environment] should be written
@@ -224,7 +224,7 @@ pub trait LatexEnvironment {
     /// # Generic parameters
     ///
     /// `W` - type parameter of the destination, expected to implement the [`Write`] trait.
-    /// 
+    ///
     /// *Note: one notable implementor of [`Write`] trait is [`String`].*
     ///
     /// # Arguments

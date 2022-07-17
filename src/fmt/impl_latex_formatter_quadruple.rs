@@ -9,8 +9,8 @@ use nalgebra::{Dim, Matrix, RawStorage};
 use crate::{
     env::{
         BracedMatrixEnvironment, BracketedMatrixEnvironment, DoubleVBarDelimitedMatrixEnvironment,
-        ParenthesizedMatrixEnvironment, PlainMatrixEnvironment, VBarDelimitedMatrixEnvironment,
-        LatexEnvironment
+        LatexEnvironment, ParenthesizedMatrixEnvironment, PlainMatrixEnvironment,
+        VBarDelimitedMatrixEnvironment,
     },
     latex_modes::{
         CategorizedLatexModeKindExt, CategoryEnumVariantExt, ControlSeqDelimited, MathLatexMode,
@@ -25,7 +25,7 @@ use super::{
 };
 
 impl<M, T, R, C, S> LatexFormatterQuadruple
-    for ZSTQuadruple<PlainMatrixContentsFormatter,Matrix<T, R, C, S>,M,M>
+    for ZSTQuadruple<PlainMatrixContentsFormatter, M, M, Matrix<T, R, C, S>>
 where
     M: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
     T: WriteAsLatex<M>,
@@ -60,7 +60,7 @@ where
 macro_rules! decl_matrix_formatter_quadruple {
     ($formatter:ident for $environment:ident) => {
         impl<IM, OM, T, R, C, S> LatexFormatterQuadruple
-            for ZSTQuadruple<$formatter,Matrix<T, R, C, S>,IM,OM>
+            for ZSTQuadruple<$formatter,IM,OM,Matrix<T, R, C, S>>
         where
             IM: CategorizedLatexModeKindExt,
             OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind> + ControlSeqDelimited,
@@ -85,7 +85,7 @@ macro_rules! decl_matrix_formatter_quadruple {
                     OM::write_opening_control_seq(dest)?;
                 };
                 <$environment>::write_opening_tag(dest)?;
-                ZSTQuadruple::<PlainMatrixContentsFormatter,Matrix<T,R,C,S>,OM,OM>::write_latex(dest, m)?;
+                ZSTQuadruple::<PlainMatrixContentsFormatter,OM,OM,Matrix<T,R,C,S>>::write_latex(dest, m)?;
                 <$environment>::write_closing_tag(dest)?;
                 if is_delimiting_required {
                     OM::write_closing_control_seq(dest)?;
