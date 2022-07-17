@@ -294,8 +294,9 @@ where
 /// let config = Config { verbose: false, ..Default::default() };
 /// execute_evcxr(r#"
 /// :dep nalgebra = "0.31.0"
-/// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
-///
+#[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
+/// :dep mime_typed = { version = "0.1.6", features = ["evcxr_support"] }
+/// 
 /// use nalgebra::{matrix, Const};
 /// use nalgebra_latex::{
 ///     lin_sys::{
@@ -304,8 +305,9 @@ where
 ///         numbering::Numbering,
 ///         fmt::CasesLinSysFormatter,
 ///     },
-///     fmt::EvcxrOutputFormatter,
+///     fmt::UncheckedEvcxrOutputFormatter,
 /// };
+/// use mime_typed::evcxr_support::TextMarkdownUtf8;
 /// use std::io::{stdout, Write};
 ///
 /// let mut s = String::new();
@@ -316,7 +318,7 @@ where
 /// );
 /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
 /// let ls = LinSys::new(m, vec_of_unknowns);
-/// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+/// unsafe { CasesLinSysFormatter::unchecked_write_evcxr_output(&mut s, &ls) }.unwrap();
 /// stdout().write_all(s.as_bytes()).unwrap();
 /// "#, config);
 /// ```
@@ -331,7 +333,7 @@ where
 ///     let config = Config { ..Config::default() };
 ///     execute_evcxr(r#"
 /// :dep nalgebra = "0.31.0"
-/// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+#[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
 ///
 /// use nalgebra::{matrix, Const};
 /// use nalgebra_latex::{
@@ -341,8 +343,9 @@ where
 ///         numbering::Numbering,
 ///         fmt::CasesLinSysFormatter,
 ///     },
-///     fmt::EvcxrOutputFormatter,
+///     fmt::UncheckedEvcxrOutputFormatter,
 /// };
+/// use mime_typed::evcxr_support::TextMarkdownUtf8;
 /// use std::io::{stdout, Write};
 ///
 /// let mut s = String::new();
@@ -354,7 +357,7 @@ where
 /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
 /// let ls = LinSys::new(m, vec_of_unknowns);
 ///
-/// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+/// unsafe { CasesLinSysFormatter::unchecked_write_evcxr_output(&mut s, &ls) }.unwrap();
 /// stdout().write_all(s.as_bytes()).unwrap();
 /// "#, config);
 /// }
@@ -402,7 +405,195 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     /// let config = Config { verbose: false, ..Default::default() };
     /// execute_evcxr(r#"
     /// :dep nalgebra = "0.31.0"
-    /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+    #[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
+    /// :dep mime_typed = "0.1.6"
+    /// 
+    /// use nalgebra::{matrix, Const};
+    /// use nalgebra_latex::{
+    ///     lin_sys::{
+    ///         LinSys,
+    ///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+    ///         numbering::Numbering,
+    ///         fmt::CasesLinSysFormatter,
+    ///     },
+    ///     fmt::UncheckedEvcxrOutputFormatter,
+    /// };
+    /// use mime_typed::evcxr_support::TextMarkdownUtf8;
+    /// use std::io::{stdout, Write};
+    ///
+    /// let mut s = String::new();
+    /// let m = matrix!(
+    ///     1,2,3;
+    ///     4,5,6;
+    ///     7,8,9;
+    /// );
+    /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+    /// let ls = LinSys::new(m, vec_of_unknowns);
+    /// unsafe { CasesLinSysFormatter::unchecked_write_evcxr_output(&mut s, &ls) }.unwrap();
+    /// stdout().write_all(s.as_bytes()).unwrap();
+    /// "#, config);
+    /// ```
+    /// # Example for Rust project
+    ///
+    /// ```
+    /// extern crate execute_evcxr;
+    ///
+    /// use execute_evcxr::{execute_evcxr, Config};
+    ///
+    /// fn main() {
+    ///     let config = Config { ..Config::default() };
+    ///     execute_evcxr(r#"
+    /// :dep nalgebra = "0.31.0"
+    #[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
+    ///
+    /// use nalgebra::{matrix, Const};
+    /// use nalgebra_latex::{
+    ///     lin_sys::{
+    ///         LinSys,
+    ///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+    ///         numbering::Numbering,
+    ///         fmt::CasesLinSysFormatter,
+    ///     },
+    ///     fmt::UncheckedEvcxrOutputFormatter,
+    /// };
+    /// use mime_typed::evcxr_support::TextMarkdownUtf8;
+    /// use std::io::{stdout, Write};
+    ///
+    /// let mut s = String::new();
+    /// let m = matrix!(
+    ///     1,2,3;
+    ///     4,5,6;
+    ///     7,8,9;
+    /// );
+    /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+    /// let ls = LinSys::new(m, vec_of_unknowns);
+    /// unsafe { CasesLinSysFormatter::unchecked_write_evcxr_output(&mut s, &ls) }.unwrap();
+    /// stdout().write_all(s.as_bytes()).unwrap();
+    /// "#, config);
+    /// }
+    /// ```    
+    ///
+    /// # Errors
+    ///
+    /// If the formatting process fails, the error must be returned as the [`Result::Err`] variant of the result
+    /// of the method.
+    ///
+    /// # Notes
+    ///
+    /// * *Implicitly, panics are not meant to happen.*
+    ///
+    /// [`evcxr`]: https://github.com/google/evcxr
+    /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
+    /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
+    unsafe fn write_evcxr_output_unchecked<M, W>(dest: &mut W, input: &I) -> Result<(), Error>
+    where
+        M: mime_typed::MimeStrExt,
+        W: Write;
+}
+
+/// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of
+/// [`evcxr`]-supported output with the given [MIME type].
+/// 
+/// # Generic arguments
+/// 
+/// `M` - type parameter representing [MIME type]; expected to implement the [`MimeStrExt`] trait.
+/// 
+/// `I` - type parameter of the inputs; `input: &I` is one of the parameters when formatting.
+/// 
+/// # Example for [Jupyter Notebook] with [`evcxr` kernel]
+/// 
+/// ```ignore
+/// :dep execute_evcxr = { version = "0.1.0" }
+///
+/// use execute_evcxr::{execute_evcxr, Config};
+///
+/// let config = Config { verbose: false, ..Default::default() };
+/// execute_evcxr(r#"
+/// :dep nalgebra = "0.31.0"
+#[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
+///
+/// use nalgebra::{matrix, Const};
+/// use nalgebra_latex::{
+///     lin_sys::{
+///         LinSys,
+///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+///         numbering::Numbering,
+///         fmt::CasesLinSysFormatter,
+///     },
+///     fmt::EvcxrOutputFormatter,
+/// };
+/// use std::io::{stdout, Write};
+///
+/// let mut s = String::new();
+/// let m = matrix!(
+///     1,2,3;
+///     4,5,6;
+///     7,8,9;
+/// );
+/// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+/// let ls = LinSys::new(m, vec_of_unknowns);
+/// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+/// stdout().write_all(s.as_bytes()).unwrap();
+/// "#, config);
+/// ```
+/// 
+/// # Example for Rust project
+///
+/// ```
+/// extern crate execute_evcxr;
+///
+/// use execute_evcxr::{execute_evcxr, Config};
+///
+/// fn main() {
+///     let config = Config { ..Config::default() };
+///     execute_evcxr(r#"
+/// :dep nalgebra = "0.31.0"
+#[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
+///
+/// use nalgebra::{matrix, Const};
+/// use nalgebra_latex::{
+///     lin_sys::{
+///         LinSys,
+///         unknowns::SingleLetterBoldfaceVecOfUnknowns,
+///         numbering::Numbering,
+///         fmt::CasesLinSysFormatter,
+///     },
+///     fmt::EvcxrOutputFormatter,
+/// };
+/// use std::io::{stdout, Write};
+///
+/// let mut s = String::new();
+/// let m = matrix!(
+///     1,2,3;
+///     4,5,6;
+///     7,8,9;
+/// );
+/// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+/// let ls = LinSys::new(m, vec_of_unknowns);
+/// CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+/// stdout().write_all(s.as_bytes()).unwrap();
+/// "#, config);
+/// }
+/// ```
+///  
+/// [`evcxr`]: https://github.com/google/evcxr
+/// [MIME type]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+/// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
+/// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
+#[cfg(feature = "evcxr")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
+pub trait EvcxrOutputFormatter<M, I> {
+    /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
+    /// 
+    /// ```ignore
+    /// :dep execute_evcxr = { version = "0.1.0" }
+    ///
+    /// use execute_evcxr::{execute_evcxr, Config};
+    ///
+    /// let config = Config { verbose: false, ..Default::default() };
+    /// execute_evcxr(r#"
+    /// :dep nalgebra = "0.31.0"
+    #[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
     ///
     /// use nalgebra::{matrix, Const};
     /// use nalgebra_latex::{
@@ -428,6 +619,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     /// stdout().write_all(s.as_bytes()).unwrap();
     /// "#, config);
     /// ```
+    /// 
     /// # Example for Rust project
     ///
     /// ```
@@ -439,7 +631,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     ///     let config = Config { ..Config::default() };
     ///     execute_evcxr(r#"
     /// :dep nalgebra = "0.31.0"
-    /// :dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+    #[doc = concat!(":dep nalgebra_latex = { version = \"", env!("CARGO_PKG_VERSION"), "\", features = [\"lin_sys\", \"evcxr\"] }")]
     ///
     /// use nalgebra::{matrix, Const};
     /// use nalgebra_latex::{
@@ -465,29 +657,7 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
     /// stdout().write_all(s.as_bytes()).unwrap();
     /// "#, config);
     /// }
-    /// ```    
-    ///
-    /// # Errors
-    ///
-    /// If the formatting process fails, the error must be returned as the [`Result::Err`] variant of the result
-    /// of the method.
-    ///
-    /// # Notes
-    ///
-    /// * *Implicitly, panics are not meant to happen.*
-    ///
-    /// [`evcxr`]: https://github.com/google/evcxr
-    /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
-    /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
-    unsafe fn write_evcxr_output_unchecked<M, W>(dest: &mut W, input: &I) -> Result<(), Error>
-    where
-        M: mime_typed::MimeStrExt,
-        W: Write;
-}
-
-#[cfg(feature = "evcxr")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
-pub trait EvcxrOutputFormatter<M, I> {
+    /// ```
     fn write_evcxr_output<W>(&self, dest: &mut W, input: &I) -> Result<(), Error>
     where
         M: mime_typed::MimeStrExt,
