@@ -496,7 +496,8 @@ pub trait UncheckedEvcxrOutputFormatter<I> {
 /// 
 /// # Generic arguments
 /// 
-/// `M` - type parameter representing [MIME type]; expected to implement the [`MimeStrExt`] trait.
+/// `M` - type parameter representing [MIME type]; expected to implement the
+/// [`MimeStrExt`][`mime_typed::MimeStrExt`] trait.
 /// 
 /// `I` - type parameter of the inputs; `input: &I` is one of the parameters when formatting.
 /// 

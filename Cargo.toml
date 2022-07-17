@@ -48,7 +48,7 @@ execute_evcxr = "0.1.1"
 const_num_bigint = "0.2.1"
 
 [features]
-# default = ["evcxr", "lin_sys"]
+default = ["evcxr", "lin_sys"]
 lin_sys = ["nalgebra_linsys", "thiserror", "either"]
 nightly = ["adt_const_params"]
 evcxr = ["mime_typed", "mime_typed/evcxr_support"]
