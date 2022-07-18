@@ -370,7 +370,7 @@ where
 /// 
 /// # Example for Rust project
 ///
-/// ```
+/// ```no_run
 /// extern crate execute_evcxr;
 ///
 /// use execute_evcxr::{execute_evcxr, Config};
@@ -455,7 +455,7 @@ pub trait EvcxrOutputFormatter<M, I> {
     /// 
     /// # Example for Rust project
     ///
-    /// ```
+    /// ```no_run
     /// extern crate execute_evcxr;
     ///
     /// use execute_evcxr::{execute_evcxr, Config};

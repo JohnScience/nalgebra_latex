@@ -30,6 +30,7 @@ use nalgebra::Dim;
 ///
 /// [linear systems]: https://en.wikipedia.org/wiki/System_of_linear_equations
 pub trait Unknowns {
+    fn len(&self) -> Result<usize, OutOfBoundsError>;
     /// Writes the representation of the "vector of unknowns" as [LaTeX], e.g. `\textbf{x}` for **x**
     /// into the given "writer", i.e. the destination that implements the [`Write`] trait.
     ///
@@ -185,6 +186,10 @@ impl<L, const N: NumberingTy> Unknowns for SingleLetterBoldfaceVecOfUnknowns<L, 
 where
     L: Copy + Dim,
 {
+    fn len(&self) -> Result<usize, OutOfBoundsError> {
+        Ok(self.len.value())
+    }
+
     fn write_latex<IM, OM, W>(&self, w: &mut W) -> Result<(), core::fmt::Error>
     where
         IM: CategorizedLatexModeKindExt,

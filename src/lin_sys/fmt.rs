@@ -17,7 +17,7 @@ use crate::{
 use nalgebra::{Dim, RawStorage};
 
 /// Plain ["environment"]-agnostic [LaTeX] formatter for [linear systems], e.g.
-/// `1x_{0}+0x_{1}+3x_{2}\\4x_{0}+5x_{1}+6x_{2}`.
+/// `1x_{0}+0x_{1}=3x\\4x_{0}+5x_{1}=6`.
 ///
 /// # Example
 ///
@@ -43,11 +43,11 @@ use nalgebra::{Dim, RawStorage};
 /// let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new(
 ///     'x',
 ///     // use nalgebra::Const if you can keep the size unchanged
-///     Dynamic::new(3)
+///     Dynamic::new(2)
 /// );
-/// let ls = LinSys::new(m, vec_of_unknowns);
+/// let ls = LinSys::new(m, vec_of_unknowns).unwrap();
 /// write_latex::<PlainLinSysFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &ls).unwrap();
-/// assert_eq!(s, r"1x_{1}+2x_{2}+3x_{3}\\4x_{1}+5x_{2}+6x_{3}\\7x_{1}+8x_{2}+9x_{3}");
+/// assert_eq!(s, r"1x_{1}+2x_{2}=3\\4x_{1}+5x_{2}=6\\7x_{1}+8x_{2}=9");
 /// ```
 ///
 /// # Notes
@@ -83,18 +83,28 @@ where
     ) -> Result<(), core::fmt::Error> {
         let nrows = input.matrix.nrows();
         let ncols = input.matrix.ncols();
+        let ncols_sub2 = match ncols.checked_sub(2) {
+            Some(n) => n,
+            None => return Ok(()),
+        };
         for i in 0..nrows {
-            for j in 0..ncols {
+            for j in 0..ncols_sub2 {
                 input.matrix[(i, j)].write_as_latex(dest)?;
                 unsafe {
                     input
                         .unknowns
                         .write_latex_for_ith_unchecked::<OM, _>(dest, j)
                 }?;
-                if j != ncols - 1 {
-                    write!(dest, "+")?;
-                }
+                write!(dest, "+")?;
             }
+            input.matrix[(i, ncols_sub2)].write_as_latex(dest)?;
+            unsafe {
+                input
+                    .unknowns
+                    .write_latex_for_ith_unchecked::<OM, _>(dest, ncols_sub2)
+            }?;
+            write!(dest, "=")?;
+            input.matrix[(i, ncols_sub2 + 1)].write_as_latex(dest)?;
             if i != nrows - 1 {
                 write!(dest, r"\\")?;
             }
