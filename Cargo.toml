@@ -1,6 +1,6 @@
 [package]
 name = "nalgebra_latex"
-version = "0.1.17"
+version = "0.1.18"
 authors = ["Dmitrii Demenev <demenev.dmitriy1@gmail.com>"]
 edition = "2021"
 rust-version = "1.56.1" # https://github.com/foresterre/cargo-msrv

@@ -74,7 +74,8 @@ LaTeX is a language for typesetting documents, especially scientific papers, and
 
 ## Warning
 
-At the moment of writing, some of the documentation is outdated due to the recent overhaul of the library.
+The library is overhauled. It changes frequently and the documentation is not always available. Doc tests
+(examples in the documentation) generally show working code.
 
 ## Resources on LaTeX
 

@@ -14,6 +14,12 @@
 //! [`amsmath`]: https://ctan.org/pkg/amsmath?lang=en
 //! [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 
+#[cfg(feature = "lin_sys")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
+pub mod labels;
+
+#[cfg(feature = "lin_sys")]
+mod impl_write_labelled_display_math_block;
 #[cfg(feature = "evcxr")]
 mod impl_evcxr_output_formatter;
 mod impl_latex_formatter;
@@ -31,6 +37,13 @@ use crate::{
     latex_modes::LatexMode,
 };
 use core::fmt::{Error, Write};
+
+#[cfg(feature = "lin_sys")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
+use {
+    labels::{LabelGenerator, Label},
+    crate::latex_modes::{DisplayMathMode, ControlSeqDelimited},
+};
 
 /// Convenience function to write [LaTeX] code to a [`Write`]r.
 /// 
@@ -319,6 +332,28 @@ where
     ///
     /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
     fn write_latex<W: Write>(dest: &mut W, input: &I) -> Result<(), Error>;
+}
+
+#[cfg(feature = "lin_sys")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
+pub trait WriteLabelledDisplayMathBlock<I>: LatexFormatter<DisplayMathMode, DisplayMathMode,I> {
+    fn write_labelled_display_math_block<G,W,L>(label_gen: &mut G, dest: &mut W, input: &I) -> Result<L, Error>
+    where
+        W: Write,
+        G: LabelGenerator<Label = L>,
+        L: Label
+    {
+        let label = match label_gen.next_label() {
+            Ok(l) => l,
+            Err(_label_gen_error) => return Err(Error),
+        };
+        <DisplayMathMode as ControlSeqDelimited>::write_opening_control_seq(dest)?;
+        Self::write_latex(dest, input)?;
+        // the call is safe because it occurs inside display math block
+        unsafe { label.tag_n_label(dest) }?;
+        <DisplayMathMode as ControlSeqDelimited>::write_closing_control_seq(dest)?;
+        Ok(label)
+    }
 }
 
 /// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of
