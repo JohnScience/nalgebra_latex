@@ -8,7 +8,6 @@ where
     F: LatexFormatter<InnerParagraphMode, DisplayMathMode, I>,
 {
     fn write_evcxr_output<W: core::fmt::Write>(
-        &self,
         dest: &mut W,
         input: &I,
     ) -> Result<(), core::fmt::Error> {

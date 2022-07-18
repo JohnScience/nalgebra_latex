@@ -495,7 +495,7 @@ pub trait EvcxrOutputFormatter<M, I> {
     /// [`evcxr`]: https://github.com/google/evcxr
     /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
     /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
-    fn write_evcxr_output<W>(&self, dest: &mut W, input: &I) -> Result<(), Error>
+    fn write_evcxr_output<W>(dest: &mut W, input: &I) -> Result<(), Error>
     where
         M: mime_typed::MimeStrExt,
         W: Write;
