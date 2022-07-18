@@ -1,5 +1,5 @@
 use crate::latex_modes::{DisplayMathMode, InnerParagraphMode};
-use mime_typed::evcxr_support::TextMarkdownUtf8;
+use mime_typed::{evcxr_support::TextMarkdownUtf8, MimeStrExt};
 
 use super::{EvcxrOutputFormatter, LatexFormatter};
 
@@ -11,6 +11,8 @@ where
         dest: &mut W,
         input: &I,
     ) -> Result<(), core::fmt::Error> {
-        F::write_latex(dest, input)
+        writeln!(dest, "EVCXR_BEGIN_CONTENT {}", TextMarkdownUtf8::MIME_STR)?;
+        F::write_latex(dest, input)?;
+        dest.write_str("\nEVCXR_END_CONTENT\n")
     }
 }
