@@ -32,6 +32,49 @@ use crate::{
 };
 use core::fmt::{Error, Write};
 
+/// Convenience function to write [LaTeX] code to a [`Write`]r.
+/// 
+/// # Generic parameters
+/// 
+/// `F` - the [`LatexFormatter`] to use.
+/// 
+/// `IM` - the initial [LaTeX mode](crate::latex_modes) in which [LaTeX] machinery
+/// is expected to be.
+/// 
+/// `OM` - the output [LaTeX mode](crate::latex_modes) in which the [LaTeX] code
+/// for the given inputs should be written.
+/// 
+/// `W` - the [`Write`]r to write to. Frequently can be delegated to be inferred
+/// by the compiler if wildcard `_` is used.
+/// 
+/// `I` - the type whose values must be formatted as [LaTeX] by reference.
+/// Frequently can be delegated to be inferred by the compiler if wildcard `_` is
+/// used.
+/// 
+/// # Example
+/// 
+/// ```
+/// use nalgebra::matrix;
+/// use nalgebra_latex::{
+/// 	fmt::{write_latex, PlainMatrixFormatter, LatexFormatter},
+/// 	latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
+/// };
+/// 
+/// let mut s = String::new();
+/// let m = matrix!(
+/// 	1,2,3,4;
+/// 	5,6,7,8;
+/// 	9,10,11,12;
+/// );
+/// 
+/// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
+/// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
+/// s.clear();
+/// write_latex::<PlainMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
+/// assert_eq!(s, r"$$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$$");
+/// ```
+/// 
+/// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 pub fn write_latex<F, IM, OM, W, I>(dest: &mut W, input: &I) -> Result<(), core::fmt::Error>
 where
     F: LatexFormatter<IM, OM, I>,
