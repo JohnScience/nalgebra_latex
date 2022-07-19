@@ -18,6 +18,7 @@
 //!             Label,
 //!         }
 //!     },
+//!     latex_modes::InnerParagraphMode,
 //! };
 //! use std::io::{stdout, Write};
 //! 
@@ -36,7 +37,7 @@
 //! s += r#"
 //! 
 //! Linear system "#;
-//! unsafe { label.eqref(&mut s) }.unwrap();
+//! unsafe { label.eqref::<InnerParagraphMode,_>(&mut s) }.unwrap();
 //! s += r#" corresponds to the "#;
 //! 
 //! s += r#"\hyperlink{augmented_matrix}{\textit{augmented matrix}}"#;

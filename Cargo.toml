@@ -1,6 +1,6 @@
 [package]
 name = "nalgebra_latex"
-version = "0.1.19"
+version = "0.1.20"
 authors = ["Dmitrii Demenev <demenev.dmitriy1@gmail.com>"]
 edition = "2021"
 rust-version = "1.56.1" # https://github.com/foresterre/cargo-msrv
@@ -47,6 +47,7 @@ mime_typed = { version = "0.1.7", optional = true }
 [dev-dependencies]
 execute_evcxr = "0.1.1"
 const_num_bigint = "0.2.1"
+partial_application = "0.2.1"
 
 [features]
 # default = ["evcxr", "lin_sys"]
