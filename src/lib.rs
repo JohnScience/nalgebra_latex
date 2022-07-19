@@ -6,9 +6,13 @@
 pub mod env;
 pub mod fmt;
 pub mod latex_modes;
+pub mod latex_flavors;
 #[cfg(feature = "lin_sys")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
 pub mod lin_sys;
+#[cfg(feature = "hyperref")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "hyperref")))]
+pub mod hyperref;
 
 mod macros {
     /// A macro for relatively convenient writing of LaTeX code.
