@@ -1,6 +1,6 @@
 //! Module with types and traits for [`nalgebra_linsys`]
 
-use nalgebra::{Matrix, Dim, RawStorage};
+use nalgebra::{Dim, Matrix, RawStorage};
 
 pub mod env;
 pub mod err;
@@ -64,8 +64,12 @@ where
 {
     pub fn new(mrls: Matrix<T, R, C, S>, unknowns: U) -> Option<Self> {
         match unknowns.len() {
-            Ok(len) => if len != mrls.ncols() - 1 { return None },
-            _ => ()
+            Ok(len) => {
+                if len != mrls.ncols() - 1 {
+                    return None;
+                }
+            }
+            _ => (),
         };
         Some(LinSys {
             matrix: mrls,

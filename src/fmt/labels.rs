@@ -1,7 +1,7 @@
 //! Module with types and traits for labels and referencing
-//! 
+//!
 //! # Example
-//! 
+//!
 //! ```
 //! use nalgebra::{matrix, Const};
 //! use nalgebra_latex::{
@@ -21,40 +21,40 @@
 //!     latex_modes::InnerParagraphMode,
 //! };
 //! use std::io::{stdout, Write};
-//! 
+//!
 //! let mut c = Counters::new();
 //! let mut s = String::new();
-//! 
+//!
 //! let m = matrix!(
 //!     6,2,-8;
 //!     3,1,-4;
 //! );
 //! let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<2>);
 //! let ls = LinSys::new(m, vec_of_unknowns).unwrap();
-//! 
+//!
 //! let label = CasesLinSysFormatter::write_labelled_display_math_block(&mut c, &mut s, &ls).unwrap();
-//! 
+//!
 //! s += r#"
-//! 
+//!
 //! Linear system "#;
 //! unsafe { label.eqref::<InnerParagraphMode,_>(&mut s) }.unwrap();
 //! s += r#" corresponds to the "#;
-//! 
+//!
 //! s += r#"\hyperlink{augmented_matrix}{\textit{augmented matrix}}"#;
 //! s += r#" $(A \vert \overrightarrow{b})$ where \\
 //! "#;
-//! 
+//!
 //! assert_eq!(s,
 //! r#"$$\begin{cases}6x_{1}+2x_{2}=-8\\3x_{1}+1x_{2}=-4\end{cases}\tag{1}\label{1}$$
-//! 
+//!
 //! Linear system $\eqref{1}$ corresponds to the \hyperlink{augmented_matrix}{\textit{augmented matrix}} $(A \vert \overrightarrow{b})$ where \\
 //! "#);
-//! 
+//!
 //! ```
 
 use core::fmt::{Error, Write};
 
-use crate::latex_modes::{LatexModeKindExt, LatexModeKind, ControlSeqDelimited, InlineMathMode};
+use crate::latex_modes::{ControlSeqDelimited, InlineMathMode, LatexModeKind, LatexModeKindExt};
 
 pub struct Counters {
     pub equation: usize,
@@ -66,7 +66,7 @@ pub struct CountersLabel(String);
 pub struct LabelGenerationError;
 
 pub trait Label {
-    fn eqref<IM,W>(&self, w: &mut W) -> Result<(), Error>
+    fn eqref<IM, W>(&self, w: &mut W) -> Result<(), Error>
     where
         IM: LatexModeKindExt,
         W: Write;
@@ -91,7 +91,7 @@ impl Counters {
 }
 
 impl Label for CountersLabel {
-    fn eqref<IM,W>(&self, w: &mut W) -> Result<(), Error>
+    fn eqref<IM, W>(&self, w: &mut W) -> Result<(), Error>
     where
         IM: LatexModeKindExt,
         W: Write,
@@ -99,7 +99,7 @@ impl Label for CountersLabel {
         // eqref needs to be in math mode, so we need to switch to math mode
         let is_delimiting_required = match IM::KIND {
             LatexModeKind::InlineMathMode | LatexModeKind::DisplayMathMode => false,
-            _ => true
+            _ => true,
         };
 
         if is_delimiting_required {
@@ -109,7 +109,7 @@ impl Label for CountersLabel {
         w.write_str(r"\eqref{")?;
         w.write_str(self.0.as_str())?;
         w.write_str("}")?;
-        
+
         if is_delimiting_required {
             InlineMathMode::write_closing_control_seq(w)?;
         }
@@ -118,7 +118,7 @@ impl Label for CountersLabel {
 
     unsafe fn tag_n_label<W>(&self, w: &mut W) -> Result<(), Error>
     where
-        W: Write
+        W: Write,
     {
         w.write_str(r"\tag{")?;
         w.write_str(self.0.as_str())?;

@@ -18,14 +18,14 @@
 #[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
 pub mod labels;
 
-#[cfg(feature = "lin_sys")]
-mod impl_write_labelled_display_math_block;
 #[cfg(feature = "evcxr")]
 mod impl_evcxr_output_formatter;
 mod impl_latex_formatter;
 mod impl_latex_formatter_quadruple;
 mod impl_unchecked_latex_formatter;
 mod impl_write_as_latex;
+#[cfg(feature = "lin_sys")]
+mod impl_write_labelled_display_math_block;
 
 use zst::ZST;
 
@@ -41,52 +41,52 @@ use core::fmt::{Error, Write};
 #[cfg(feature = "lin_sys")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
 use {
-    labels::{LabelGenerator, Label},
-    crate::latex_modes::{DisplayMathMode, ControlSeqDelimited},
+    crate::latex_modes::{ControlSeqDelimited, DisplayMathMode},
+    labels::{Label, LabelGenerator},
 };
 
 /// Convenience function to write [LaTeX] code to a [`Write`]r.
-/// 
+///
 /// # Generic parameters
-/// 
+///
 /// `F` - the [`LatexFormatter`] to use.
-/// 
+///
 /// `IM` - the initial [LaTeX mode](crate::latex_modes) in which [LaTeX] machinery
 /// is expected to be.
-/// 
+///
 /// `OM` - the output [LaTeX mode](crate::latex_modes) in which the [LaTeX] code
 /// for the given inputs should be written.
-/// 
+///
 /// `W` - the [`Write`]r to write to. Frequently can be delegated to be inferred
 /// by the compiler if wildcard `_` is used.
-/// 
+///
 /// `I` - the type whose values must be formatted as [LaTeX] by reference.
 /// Frequently can be delegated to be inferred by the compiler if wildcard `_` is
 /// used.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use nalgebra::matrix;
 /// use nalgebra_latex::{
-/// 	fmt::{write_latex, PlainMatrixFormatter, LatexFormatter},
-/// 	latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
+///     fmt::{write_latex, PlainMatrixFormatter, LatexFormatter},
+///     latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
 /// };
-/// 
+///
 /// let mut s = String::new();
 /// let m = matrix!(
-/// 	1,2,3,4;
-/// 	5,6,7,8;
-/// 	9,10,11,12;
+///     1,2,3,4;
+///     5,6,7,8;
+///     9,10,11,12;
 /// );
-/// 
+///
 /// write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
 /// s.clear();
 /// write_latex::<PlainMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
 /// assert_eq!(s, r"$$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$$");
 /// ```
-/// 
+///
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 pub fn write_latex<F, IM, OM, W, I>(dest: &mut W, input: &I) -> Result<(), core::fmt::Error>
 where
@@ -99,7 +99,7 @@ where
 }
 
 /// Its implementors can be written as [LaTeX] in the given [LaTeX mode][crate::latex_modes].
-/// 
+///
 /// [LaTeX]: https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes#What_is_LaTeX.3F
 pub trait WriteAsLatex<M>
 where
@@ -191,7 +191,7 @@ pub trait UncheckedLatexFormatter<I> {
     /// assert_eq!(s, r"\begin{pmatrix}1&2\\3&4\end{pmatrix}");
     /// ```
     ///
-    /// # Unsafety
+    /// # Safety
     ///
     /// This is unsafe because the caller must guarantee that the input will be formated as a valid [LaTeX] string.
     ///
@@ -336,12 +336,18 @@ where
 
 #[cfg(feature = "lin_sys")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
-pub trait WriteLabelledDisplayMathBlock<I>: LatexFormatter<DisplayMathMode, DisplayMathMode,I> {
-    fn write_labelled_display_math_block<G,W,L>(label_gen: &mut G, dest: &mut W, input: &I) -> Result<L, Error>
+pub trait WriteLabelledDisplayMathBlock<I>:
+    LatexFormatter<DisplayMathMode, DisplayMathMode, I>
+{
+    fn write_labelled_display_math_block<G, W, L>(
+        label_gen: &mut G,
+        dest: &mut W,
+        input: &I,
+    ) -> Result<L, Error>
     where
         W: Write,
         G: LabelGenerator<Label = L>,
-        L: Label
+        L: Label,
     {
         let label = match label_gen.next_label() {
             Ok(l) => l,
@@ -358,16 +364,16 @@ pub trait WriteLabelledDisplayMathBlock<I>: LatexFormatter<DisplayMathMode, Disp
 
 /// Implementers of the trait allow by-reference formatting of values of type-parameter in the form of
 /// [`evcxr`]-supported output with the given [MIME type].
-/// 
+///
 /// # Generic arguments
-/// 
+///
 /// `M` - type parameter representing [MIME type]; expected to implement the
 /// [`MimeStrExt`][`mime_typed::MimeStrExt`] trait.
-/// 
+///
 /// `I` - type parameter of the inputs; `input: &I` is one of the parameters when formatting.
-/// 
+///
 /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
-/// 
+///
 /// ```ignore
 /// :dep execute_evcxr = { version = "0.1.1" }
 ///
@@ -402,7 +408,7 @@ pub trait WriteLabelledDisplayMathBlock<I>: LatexFormatter<DisplayMathMode, Disp
 /// stdout().write_all(s.as_bytes()).unwrap();
 /// "#, config);
 /// ```
-/// 
+///
 /// # Example for Rust project
 ///
 /// ```no_run
@@ -449,10 +455,10 @@ pub trait WriteLabelledDisplayMathBlock<I>: LatexFormatter<DisplayMathMode, Disp
 #[cfg(feature = "evcxr")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
 pub trait EvcxrOutputFormatter<M, I> {
-    /// 
-    /// 
+    ///
+    ///
     /// # Example for [Jupyter Notebook] with [`evcxr` kernel]
-    /// 
+    ///
     /// ```ignore
     /// :dep execute_evcxr = { version = "0.1.1" }
     ///
@@ -487,7 +493,7 @@ pub trait EvcxrOutputFormatter<M, I> {
     /// stdout().write_all(s.as_bytes()).unwrap();
     /// "#, config);
     /// ```
-    /// 
+    ///
     /// # Example for Rust project
     ///
     /// ```no_run
@@ -526,7 +532,7 @@ pub trait EvcxrOutputFormatter<M, I> {
     /// "#, config);
     /// }
     /// ```
-    /// 
+    ///
     /// [`evcxr`]: https://github.com/google/evcxr
     /// [`evcxr` kernel]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
     /// [Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook

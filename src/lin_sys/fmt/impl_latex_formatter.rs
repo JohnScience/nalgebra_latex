@@ -11,7 +11,7 @@ use crate::{
 };
 use nalgebra::{Dim, RawStorage};
 
-use super::{PlainLinSysFormatter, CasesLinSysFormatter};
+use super::{CasesLinSysFormatter, PlainLinSysFormatter};
 
 impl<IM, OM, T, R, C, S, U> LatexFormatter<IM, OM, LinSys<T, R, C, S, U>> for PlainLinSysFormatter
 where
