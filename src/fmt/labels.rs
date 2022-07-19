@@ -53,6 +53,8 @@
 
 use core::fmt::{Error, Write};
 
+use crate::latex_modes::{LatexModeKindExt, LatexModeKind, ControlSeqDelimited, InlineMathMode};
+
 pub struct Counters {
     pub equation: usize,
     others: core::marker::PhantomData<()>,
@@ -63,8 +65,9 @@ pub struct CountersLabel(String);
 pub struct LabelGenerationError;
 
 pub trait Label {
-    unsafe fn eqref<W>(&self, w: &mut W) -> Result<(), Error>
+    fn eqref<IM,W>(&self, w: &mut W) -> Result<(), Error>
     where
+        IM: LatexModeKindExt,
         W: Write;
     unsafe fn tag_n_label<W>(&self, w: &mut W) -> Result<(), Error>
     where
@@ -87,13 +90,29 @@ impl Counters {
 }
 
 impl Label for CountersLabel {
-    unsafe fn eqref<W>(&self, w: &mut W) -> Result<(), Error>
+    fn eqref<IM,W>(&self, w: &mut W) -> Result<(), Error>
     where
+        IM: LatexModeKindExt,
         W: Write,
     {
-        w.write_str(r"$\eqref{")?;
+        // eqref needs to be in math mode, so we need to switch to math mode
+        let is_delimiting_required = match IM::KIND {
+            LatexModeKind::InlineMathMode | LatexModeKind::DisplayMathMode => false,
+            _ => true
+        };
+
+        if is_delimiting_required {
+            InlineMathMode::write_opening_control_seq(w)?;
+        }
+
+        w.write_str(r"\eqref{")?;
         w.write_str(self.0.as_str())?;
-        w.write_str("}$")
+        w.write_str("}")?;
+        
+        if is_delimiting_required {
+            InlineMathMode::write_closing_control_seq(w)?;
+        }
+        Ok(())
     }
 
     unsafe fn tag_n_label<W>(&self, w: &mut W) -> Result<(), Error>
