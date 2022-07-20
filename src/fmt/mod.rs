@@ -38,8 +38,6 @@ use crate::{
 };
 use core::fmt::{Error, Write};
 
-use self::labels::EqChangeExt;
-
 #[cfg(feature = "lin_sys")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "lin_sys")))]
 use {
@@ -348,7 +346,7 @@ pub trait WriteLabelledDisplayMathBlock<I>:
     ) -> Result<L, Error>
     where
         W: Write,
-        G: LabelGenerator<Label = L> + EqChangeExt,
+        G: LabelGenerator<Label = L> + labels::EqChangeExt,
         L: Label,
     {
         let label = match label_gen.next_label(G::EQ_CHANGE) {
