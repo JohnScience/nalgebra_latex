@@ -19,6 +19,7 @@
 //!         }
 //!     },
 //!     latex_modes::InnerParagraphMode,
+//!     latex_flavors::AmsLatex,
 //! };
 //! use std::io::{stdout, Write};
 //!
@@ -37,7 +38,7 @@
 //! s += r#"
 //!
 //! Linear system "#;
-//! unsafe { label.eqref::<InnerParagraphMode,_>(&mut s) }.unwrap();
+//! unsafe { label.eqref::<AmsLatex,InnerParagraphMode,_>(&mut s) }.unwrap();
 //! s += r#" corresponds to the "#;
 //!
 //! s += r#"\hyperlink{augmented_matrix}{\textit{augmented matrix}}"#;
@@ -52,22 +53,37 @@
 //!
 //! ```
 
-use core::fmt::{Error, Write};
+use core::{
+    num::NonZeroU8,
+    fmt::{Error, Write}
+};
 
 use crate::latex_modes::{ControlSeqDelimited, InlineMathMode, LatexModeKind, LatexModeKindExt};
 
 pub struct Counters {
     pub equation: usize,
+    pub subeq : Option<NonZeroU8>,
     others: core::marker::PhantomData<()>,
 }
 
-pub struct CountersLabel(String);
+pub enum CountersLabel {
+    Equation(String),
+    Subeq(String),
+}
 
+pub enum CountersChange {
+    IncrementEquation,
+    IncrementEquationAndAddSubeq,
+    IncrementSubeq,
+}
+
+#[derive(Debug)]
 pub struct LabelGenerationError;
 
 pub trait Label {
-    fn eqref<IM, W>(&self, w: &mut W) -> Result<(), Error>
+    fn eqref<F,IM, W>(&self, w: &mut W) -> Result<(), Error>
     where
+        F: LabelsSupportedLatexFlavorsKindExt,
         IM: LatexModeKindExt,
         W: Write;
     unsafe fn tag_n_label<W>(&self, w: &mut W) -> Result<(), Error>
@@ -77,22 +93,73 @@ pub trait Label {
 
 pub trait LabelGenerator {
     type Label: Label;
+    type Change;
 
-    fn next_label(&mut self) -> Result<Self::Label, LabelGenerationError>;
+    fn next_label(&mut self, c: Self::Change) -> Result<Self::Label, LabelGenerationError>;
+}
+
+pub trait EqChangeExt: LabelGenerator {
+    const EQ_CHANGE: Self::Change;
+}
+
+macro_rules! decl_labels_supported_latex_flavors {
+    ($($flavor:ident,)+) => {
+        pub enum LabelsSupportedLatexFlavorsKind {
+            $($flavor),+
+        }
+
+        pub trait LabelsSupportedLatexFlavorsKindExt {
+            const FLAVOR: LabelsSupportedLatexFlavorsKind;
+        }
+
+        $(
+            impl LabelsSupportedLatexFlavorsKindExt for crate::latex_flavors::$flavor {
+                const FLAVOR: LabelsSupportedLatexFlavorsKind = LabelsSupportedLatexFlavorsKind::$flavor;
+            }
+        )+
+    };
+}
+
+decl_labels_supported_latex_flavors!(
+    AmsLatex,
+    MathJax,
+);
+
+impl CountersLabel {
+    fn as_str(&self) -> &str {
+        match self {
+            CountersLabel::Equation(s) => s.as_str(),
+            CountersLabel::Subeq(s) => s.as_str(),
+        }
+    }
+
+    fn tag<W: Write>(&self, w: &mut W) -> Result<(), Error> {
+        match self {
+            CountersLabel::Equation(_) => w.write_str(r"\tag{"),
+            CountersLabel::Subeq(_) => w.write_str("& ("),
+        }?;
+        w.write_str(self.as_str())?;
+        w.write_char(match self {
+            CountersLabel::Equation(_) => '}',
+            CountersLabel::Subeq(_) => ')',
+        })
+    }
 }
 
 impl Counters {
     pub fn new() -> Self {
         Self {
-            equation: 1,
+            equation: 0,
+            subeq: None,
             others: core::marker::PhantomData,
         }
     }
 }
 
 impl Label for CountersLabel {
-    fn eqref<IM, W>(&self, w: &mut W) -> Result<(), Error>
+    fn eqref<F,IM, W>(&self, w: &mut W) -> Result<(), Error>
     where
+        F: LabelsSupportedLatexFlavorsKindExt,
         IM: LatexModeKindExt,
         W: Write,
     {
@@ -106,9 +173,18 @@ impl Label for CountersLabel {
             InlineMathMode::write_opening_control_seq(w)?;
         }
 
-        w.write_str(r"\eqref{")?;
-        w.write_str(self.0.as_str())?;
-        w.write_str("}")?;
+        match (F::FLAVOR, self) {
+            (LabelsSupportedLatexFlavorsKind::MathJax, CountersLabel::Subeq(s)) => {
+                w.write_str(r"(")?;
+                w.write_str(s.as_str())?;
+                w.write_str(")")?;
+            },
+            _ => {
+                w.write_str(r"\eqref{")?;
+                w.write_str(self.as_str())?;
+                w.write_str("}")?;
+            }
+        }
 
         if is_delimiting_required {
             InlineMathMode::write_closing_control_seq(w)?;
@@ -120,21 +196,47 @@ impl Label for CountersLabel {
     where
         W: Write,
     {
-        w.write_str(r"\tag{")?;
-        w.write_str(self.0.as_str())?;
-        w.write_char('}')?;
+        self.tag(w)?;
         w.write_str(r"\label{")?;
-        w.write_str(self.0.as_str())?;
+        w.write_str(self.as_str())?;
         w.write_char('}')
     }
 }
 
 impl LabelGenerator for Counters {
     type Label = CountersLabel;
+    type Change = CountersChange;
 
-    fn next_label(&mut self) -> Result<Self::Label, LabelGenerationError> {
-        let label = format!("{}", self.equation);
-        self.equation += 1;
-        Ok(CountersLabel(label))
+    fn next_label(&mut self, c: Self::Change) -> Result<Self::Label, LabelGenerationError> {
+        let label = match c {
+            CountersChange::IncrementEquation => {
+                self.equation += 1;
+                self.subeq = None;
+                CountersLabel::Equation(format!("{}", self.equation))
+            },
+            CountersChange::IncrementSubeq => {
+                
+                let n = match  self.subeq {
+                    Some(n) => n.get(),
+                    None => return Err(LabelGenerationError),
+                };
+                if n == 26 {
+                    return Err(LabelGenerationError);
+                }
+                let label = format!("{}{}", self.equation, (b'a' + n) as char);
+                self.subeq = Some(unsafe { NonZeroU8::new_unchecked(n + 1) });
+                CountersLabel::Subeq(label)
+            },
+            CountersChange::IncrementEquationAndAddSubeq => {
+                self.equation += 1;
+                self.subeq = Some(unsafe { NonZeroU8::new_unchecked(1) });
+                CountersLabel::Subeq(format!("{}a", self.equation))
+            },
+        };
+        Ok(label)
     }
+}
+
+impl EqChangeExt for Counters {
+    const EQ_CHANGE: Self::Change = CountersChange::IncrementEquation;
 }

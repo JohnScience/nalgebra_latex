@@ -50,7 +50,7 @@ const_num_bigint = "0.2.1"
 partial_application = "0.2.1"
 
 [features]
-# default = ["evcxr", "lin_sys", "hyperref"]
+default = ["evcxr", "lin_sys", "hyperref"]
 lin_sys = ["nalgebra_linsys", "thiserror", "either"]
 evcxr = ["mime_typed", "mime_typed/evcxr_support"]
 hyperref = []
