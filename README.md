@@ -77,6 +77,8 @@ LaTeX is a language for typesetting documents, especially scientific papers, and
 The library is overhauled. It changes frequently and the documentation is not always available. Doc tests
 (examples in the documentation) generally show working code.
 
+A lot of previous work was put into trash to make it work better.
+
 ## Resources on LaTeX
 
 * [LaTeX documentation on Overleaf](https://www.overleaf.com/learn)

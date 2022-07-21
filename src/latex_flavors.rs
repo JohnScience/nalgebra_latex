@@ -1,5 +1,5 @@
 macro_rules! decl_latex_flavors {
-    ($($flavor:ident,)+) => {        
+    ($($flavor:ident,)+) => {
         pub enum LatexFlavorKind {
             $(
                 $flavor,
