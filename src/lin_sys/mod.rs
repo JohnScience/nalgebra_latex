@@ -1,9 +1,9 @@
-use nalgebra::{Dim, RawStorage, Matrix};
+use nalgebra::{Dim, Matrix, RawStorage};
 
 pub mod err;
+pub mod fmt;
 pub mod numbering;
 pub mod unknowns;
-pub mod fmt;
 
 pub struct LinSys<T, R, C, S, U>
 where

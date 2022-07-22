@@ -1,6 +1,14 @@
-//use crate::{fmt::LatexFormatter, latex_flavors::LatexFlavor, latex_modes::MathLatexMode};
-//
-//use super::CasesLinSysFormatter;
+use nalgebra::{Dim, RawStorage};
+
+use crate::{
+    fmt::{LatexFormatter, WriteAsLatex},
+    latex_features::LatexFeatures,
+    latex_flavors::LatexFlavor,
+    latex_modes::MathLatexMode,
+    lin_sys::{unknowns::Unknowns, LinSys},
+};
+
+use super::{CasesLinSysFormatter, PlainLinSysFormatter};
 
 //use core::fmt::Write;
 //
@@ -17,58 +25,53 @@
 //
 //use super::{CasesLinSysFormatter, PlainLinSysFormatter};
 //
-//impl<IM, OM, T, R, C, S, U> LatexFormatter<IM, OM, LinSys<T, R, C, S, U>> for PlainLinSysFormatter
-//where
-//    IM: CategorizedLatexModeKindExt,
-//    OM: MathLatexMode + CategoryEnumVariantExt<MathLatexModeKind>,
-//    T: WriteAsLatex<OM>,
-//    R: Dim,
-//    C: Dim,
-//    S: RawStorage<T, R, C>,
-//    U: Unknowns,
-//{
-//    fn write_latex<W: Write>(
-//        dest: &mut W,
-//        input: &LinSys<T, R, C, S, U>,
-//    ) -> Result<(), core::fmt::Error> {
-//        let nrows = input.matrix.nrows();
-//        let ncols = input.matrix.ncols();
-//        let ncols_sub2 = match ncols.checked_sub(2) {
-//            Some(n) => n,
-//            None => return Ok(()),
-//        };
-//        for i in 0..nrows {
-//            for j in 0..ncols_sub2 {
-//                input.matrix[(i, j)].write_as_latex(dest)?;
-//                unsafe {
-//                    input
-//                        .unknowns
-//                        .write_latex_for_ith_unchecked::<OM, _>(dest, j)
-//                }?;
-//                write!(dest, "+")?;
-//            }
-//            input.matrix[(i, ncols_sub2)].write_as_latex(dest)?;
-//            unsafe {
-//                input
-//                    .unknowns
-//                    .write_latex_for_ith_unchecked::<OM, _>(dest, ncols_sub2)
-//            }?;
-//            write!(dest, "=")?;
-//            input.matrix[(i, ncols_sub2 + 1)].write_as_latex(dest)?;
-//            if i != nrows - 1 {
-//                write!(dest, r"\\")?;
-//            }
-//        }
-//        Ok(())
-//    }
-//}
-//
 
-//impl<Fl,Fe,M,T,R,C,S,U> LatexFormatter<Fl,Fe,Fe,M,M,I> for CasesLinSysFormatter
-//where
-//    Fl: LatexFlavor,
-//    Fe: LatexFeatures,
-//    M: MathLatexMode,
+impl<Fl, Fe, M, T, R, C, S, U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
+    for PlainLinSysFormatter
+where
+    Fl: LatexFlavor,
+    Fe: LatexFeatures,
+    M: MathLatexMode,
+    T: WriteAsLatex<Fl, Fe, M>,
+    R: Dim,
+    C: Dim,
+    S: RawStorage<T, R, C>,
+    U: Unknowns,
+{
+    fn write<IW, OW>(mut dest: IW, input: &LinSys<T, R, C, S, U>) -> Result<OW, core::fmt::Error>
+    where
+        IW: crate::latex_writer::LatexWriter<
+            Flavor = Fl,
+            Features = Fe,
+            Mode = M,
+            NestedWriter = OW::NestedWriter,
+        >,
+        OW: crate::latex_writer::LatexWriter<Flavor = Fl, Features = Fe, Mode = M>,
+    {
+        let nrows = input.matrix.nrows();
+        let ncols = input.matrix.ncols();
+
+        let ncols_sub2 = match ncols.checked_sub(2) {
+            Some(n) => n,
+            None => return Ok(unsafe { dest.rebuild() }),
+        };
+        for i in 0..nrows {
+            for j in 0..ncols_sub2 {
+                dest = input.matrix[(i, j)].write_as_latex(dest)?;
+                unsafe { input.unknowns.write_ith_unchecked(&mut dest, j) }?;
+                unsafe { dest.write_char('+') }?;
+            }
+            dest = input.matrix[(i, ncols_sub2)].write_as_latex(dest)?;
+            unsafe { input.unknowns.write_ith_unchecked(&mut dest, ncols_sub2) }?;
+            unsafe { dest.write_char('=') }?;
+            dest = input.matrix[(i, ncols_sub2 + 1)].write_as_latex(dest)?;
+            if i != nrows - 1 {
+                unsafe { dest.write_str(r"\\") }?;
+            }
+        }
+        Ok(unsafe { dest.rebuild() })
+    }
+}
 
 //impl<IM, OM, T, R, C, S, U> LatexFormatter<IM, OM, LinSys<T, R, C, S, U>> for CasesLinSysFormatter
 //where

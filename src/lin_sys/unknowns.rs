@@ -16,10 +16,10 @@ pub trait Unknowns {
 
     fn validate_idx(&self, zbi: usize) -> Result<(), OutOfBoundsError>;
 
-    fn write<W,M>(&self, w: &mut W) -> Result<(), Error>
+    fn write<W, M>(&self, w: &mut W) -> Result<(), Error>
     where
         M: MathLatexMode,
-        W: LatexWriter<Mode=M>;
+        W: LatexWriter<Mode = M>;
 
     unsafe fn write_ith_unchecked<W, M>(&self, w: &mut W, zbi: usize) -> Result<(), Error>
     where
@@ -70,10 +70,10 @@ where
         Ok(self.len.value())
     }
 
-    fn write<W,M>(&self, w: &mut W) -> Result<(), core::fmt::Error>
+    fn write<W, M>(&self, w: &mut W) -> Result<(), core::fmt::Error>
     where
         M: MathLatexMode,
-        W: LatexWriter<Mode=M>,
+        W: LatexWriter<Mode = M>,
     {
         unsafe {
             w.write_str(r"\textbf{")?;

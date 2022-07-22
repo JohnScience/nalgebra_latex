@@ -1,6 +1,10 @@
 use core::marker::PhantomData;
 
-use crate::{latex_flavors::LatexFlavorKindExt, latex_modes::LatexMode, latex_features::LatexFeatures};
+use crate::{
+    latex_features::{LatexFeatures, NoFeatures},
+    latex_flavors::LatexFlavorKindExt,
+    latex_modes::LatexMode,
+};
 
 #[inline(always)]
 pub fn write_latex<IW, OW, T>(w: IW, t: &T) -> Result<OW, core::fmt::Error>
@@ -33,6 +37,37 @@ pub trait LatexWriter: UnsafeWrite {
 
     fn to_raw_parts(self) -> (Self::NestedWriter, Self::Features);
     unsafe fn from_raw_parts(w: Self::NestedWriter, features: Self::Features) -> Self;
+
+    #[inline(always)]
+    unsafe fn rebuild<T>(self) -> T
+    where
+        Self: Sized,
+        T: LatexWriter<
+            Flavor = Self::Flavor,
+            Features = Self::Features,
+            Mode = Self::Mode,
+            NestedWriter = Self::NestedWriter,
+        >,
+    {
+        let (nested_writer, features) = self.to_raw_parts();
+        T::from_raw_parts(nested_writer, features)
+    }
+
+    #[inline(always)]
+    fn new(w: Self::NestedWriter) -> Self
+    where
+        Self: Sized + LatexWriter<Features = NoFeatures>,
+    {
+        unsafe { Self::from_raw_parts(w, NoFeatures) }
+    }
+
+    fn default() -> Self
+    where
+        Self: Sized + LatexWriter<Features = NoFeatures>,
+        Self::NestedWriter: Default,
+    {
+        Self::new(Default::default())
+    }
 }
 
 pub struct Writer<Fl, Fe, M, W> {
@@ -74,7 +109,7 @@ where
     #[inline(always)]
     pub unsafe fn switch_features_unchecked<Nf>(self) -> Writer<Fl, Nf, M, W>
     where
-        Nf: From<Fe>
+        Nf: From<Fe>,
     {
         Writer {
             writer: self.writer,
@@ -125,7 +160,13 @@ where
         (self.writer, self.features)
     }
 
+    #[inline(always)]
     unsafe fn from_raw_parts(w: Self::NestedWriter, features: Self::Features) -> Self {
-        Self { writer: w, flavor: PhantomData, features, mode: PhantomData }
+        Self {
+            writer: w,
+            flavor: PhantomData,
+            features,
+            mode: PhantomData,
+        }
     }
 }

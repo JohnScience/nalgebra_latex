@@ -11,7 +11,10 @@ where
 
     fn write_name(w: &mut W) -> Result<(), core::fmt::Error>;
     fn write_opening_tag(w: InitW) -> Result<Self::InterWriter, core::fmt::Error>;
-    unsafe fn write_closing_tag_unchecked(w: W, features: Fe) -> Result<Self::OWriter, core::fmt::Error>;
+    unsafe fn write_closing_tag_unchecked(
+        w: W,
+        features: Fe,
+    ) -> Result<Self::OWriter, core::fmt::Error>;
     #[inline(always)]
     fn write_closing_tag(w: Self::InterWriter) -> Result<Self::OWriter, core::fmt::Error> {
         let (nested_writer, features) = w.to_raw_parts();

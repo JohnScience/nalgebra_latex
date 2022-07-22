@@ -1,30 +1,21 @@
 use super::WriteAsLatex;
 use crate::{
-    latex_modes::LatexMode,
-    latex_flavors::LatexFlavor,
-    latex_features::LatexFeatures,
+    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::LatexMode,
     latex_writer::LatexWriter,
 };
 use core::fmt::{Error, Write};
 
 macro_rules! impl_for_prim_numeric {
     ($t:ident) => {
-        impl<Fl,Fe,M> WriteAsLatex<Fl,Fe,M> for $t
+        impl<Fl, Fe, M> WriteAsLatex<Fl, Fe, M> for $t
         where
             Fl: LatexFlavor,
             Fe: LatexFeatures,
             M: LatexMode,
         {
-            fn write_as_latex<W,NW>(
-                &self,
-                dest: W,
-            ) -> Result<W, Error>
+            fn write_as_latex<W, NW>(&self, dest: W) -> Result<W, Error>
             where
-                W: LatexWriter<
-                    Flavor = Fl,
-                    Features = Fe,
-                    Mode = M,
-                >,
+                W: LatexWriter<Flavor = Fl, Features = Fe, Mode = M>,
             {
                 let (mut nested_writer, features) = dest.to_raw_parts();
                 write!(nested_writer, "{}", self)?;

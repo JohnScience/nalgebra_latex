@@ -11,24 +11,14 @@ On top of that, the crate offers feature-gated support for [`nalgebra_linsys`] a
 ## Example
 
 ```rust
-use nalgebra::matrix;
 use nalgebra_latex::{
-	fmt::{write_latex, PlainMatrixFormatter, LatexFormatter},
-	latex_modes::{InlineMathMode, DisplayMathMode, InnerParagraphMode},
+	latex_writer::{Writer, LatexWriter},
+	latex_flavors::AmsLatex,
+	latex_features::NoFeatures,
+	latex_modes::InnerParagraphMode,
 };
 
-let mut s = String::new();
-let m = matrix!(
-	1,2,3,4;
-	5,6,7,8;
-	9,10,11,12;
-);
-
-write_latex::<PlainMatrixFormatter,InnerParagraphMode,InlineMathMode,_,_>(&mut s, &m).unwrap();
-assert_eq!(s, r"$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$");
-s.clear();
-write_latex::<PlainMatrixFormatter,InnerParagraphMode,DisplayMathMode,_,_>(&mut s, &m).unwrap();
-assert_eq!(s, r"$$\begin{matrix}1&2&3&4\\5&6&7&8\\9&10&11&12\end{matrix}$$");
+let s = Writer::<AmsLatex,NoFeatures,InnerParagraphMode,String>::default();
 ```
 
 ## What is [`nalgebra`]?

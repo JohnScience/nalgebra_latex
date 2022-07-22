@@ -4,11 +4,11 @@
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 
 pub mod env;
-pub mod latex_flavors;
+pub mod fmt;
 pub mod latex_features;
+pub mod latex_flavors;
 pub mod latex_modes;
 pub mod latex_writer;
-pub mod fmt;
 pub mod lin_sys;
 
 mod macros {
