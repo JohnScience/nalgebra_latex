@@ -1,25 +1,24 @@
-use super::WriteAsLatex;
+use super::{PartialEndofunctionalWriteAsLatex, WriteAsLatex};
 use crate::{
     latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::LatexMode,
     latex_writer::LatexWriter,
 };
-use core::fmt::{Error, Write};
+use core::fmt::Error;
 
 macro_rules! impl_for_prim_numeric {
     ($t:ident) => {
-        impl<Fl,Fe, M, NestedWriter,W> WriteAsLatex<Fl,Fe,Fe,M,M,NestedWriter,W,W> for $t
+        impl<Fl, Fe, M> PartialEndofunctionalWriteAsLatex<Fl, Fe, M> for $t
         where
             Fl: LatexFlavor,
             Fe: LatexFeatures,
-            M : LatexMode,
-            NestedWriter: Write,
-            W: LatexWriter<Flavor = Fl, Features = Fe, Mode = M, NestedWriter = NestedWriter>,
+            M: LatexMode,
         {
-            fn write_as_latex(&self, dest: W) -> Result<W, Error>
+            #[inline(always)]
+            fn partial_endofunctional_write_as_latex<W, NW>(&self, dest: W) -> Result<W, Error>
+            where
+                W: LatexWriter<Flavor = Fl, Features = Fe, Mode = M>,
             {
-                let (mut nested_writer, features) = dest.to_raw_parts();
-                write!(nested_writer, "{}", self)?;
-                Ok(unsafe { W::from_raw_parts(nested_writer, features) })
+                self.write_as_latex(dest)
             }
         }
     };

@@ -1,10 +1,10 @@
 use nalgebra::{Dim, RawStorage};
 
 use crate::{
-    fmt::{LatexFormatter, WriteAsLatex},
+    fmt::{LatexFormatter, PartialEndofunctionalWriteAsLatex},
     latex_features::LatexFeatures,
     latex_flavors::LatexFlavor,
-    latex_modes::MathLatexMode,
+    latex_modes::{MathLatexMode},
     lin_sys::{unknowns::Unknowns, LinSys},
 };
 
@@ -25,14 +25,14 @@ use super::{CasesLinSysFormatter, PlainLinSysFormatter};
 //
 //use super::{CasesLinSysFormatter, PlainLinSysFormatter};
 //
-
+   
 impl<Fl, Fe, M, T, R, C, S, U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
     for PlainLinSysFormatter
 where
     Fl: LatexFlavor,
     Fe: LatexFeatures,
     M: MathLatexMode,
-    T: WriteAsLatex<Fl, Fe, M>,
+    T: PartialEndofunctionalWriteAsLatex<Fl, Fe, M>,
     R: Dim,
     C: Dim,
     S: RawStorage<T, R, C>,
@@ -57,14 +57,14 @@ where
         };
         for i in 0..nrows {
             for j in 0..ncols_sub2 {
-                dest = input.matrix[(i, j)].write_as_latex(dest)?;
+                dest = input.matrix[(i, j)].partial_endofunctional_write_as_latex(dest)?;
                 unsafe { input.unknowns.write_ith_unchecked(&mut dest, j) }?;
                 unsafe { dest.write_char('+') }?;
             }
-            dest = input.matrix[(i, ncols_sub2)].write_as_latex(dest)?;
+            dest = input.matrix[(i, ncols_sub2)].partial_endofunctional_write_as_latex(dest)?;
             unsafe { input.unknowns.write_ith_unchecked(&mut dest, ncols_sub2) }?;
             unsafe { dest.write_char('=') }?;
-            dest = input.matrix[(i, ncols_sub2 + 1)].write_as_latex(dest)?;
+            dest = input.matrix[(i, ncols_sub2 + 1)].partial_endofunctional_write_as_latex(dest)?;
             if i != nrows - 1 {
                 unsafe { dest.write_str(r"\\") }?;
             }
