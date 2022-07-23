@@ -32,6 +32,8 @@ pub trait LatexFormatter<
 
 pub trait WriteAsLatex<Fl, Fe, M>
 where
+    Fl: LatexFlavor,
+    Fe: LatexFeatures,
     M: LatexMode,
 {
     fn write_as_latex<W, NW>(&self, dest: W) -> Result<W, core::fmt::Error>
