@@ -4,7 +4,7 @@ use crate::{
     fmt::{LatexFormatter, PartialEndofunctionalWriteAsLatex},
     latex_features::LatexFeatures,
     latex_flavors::LatexFlavor,
-    latex_modes::{MathLatexMode},
+    latex_modes::MathLatexMode,
     lin_sys::{unknowns::Unknowns, LinSys},
 };
 
@@ -25,7 +25,7 @@ use super::{CasesLinSysFormatter, PlainLinSysFormatter};
 //
 //use super::{CasesLinSysFormatter, PlainLinSysFormatter};
 //
-   
+
 impl<Fl, Fe, M, T, R, C, S, U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
     for PlainLinSysFormatter
 where

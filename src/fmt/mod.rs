@@ -3,8 +3,9 @@ use crate::{
     latex_writer::LatexWriter,
 };
 
-mod impl_write_as_latex;
+mod impl_consuming_write_as_latex;
 mod impl_partial_endofunctional_write_as_latex;
+mod impl_write_as_latex;
 
 pub trait LatexFormatter<
     Flavor,
@@ -31,7 +32,7 @@ pub trait LatexFormatter<
         OW: LatexWriter<Flavor = Flavor, Features = ConsequentFeatures, Mode = ConsequentMode>;
 }
 
-pub trait WriteAsLatex<Fl,InitFe,ConseqFe,InitM,ConseqM, NestedWriter,IW,OW>
+pub trait WriteAsLatex<Fl, InitFe, ConseqFe, InitM, ConseqM, NestedWriter, IW, OW>
 where
     Fl: LatexFlavor,
     InitFe: LatexFeatures,
@@ -43,6 +44,20 @@ where
     OW: LatexWriter<Flavor = Fl, Features = ConseqFe, Mode = ConseqM, NestedWriter = NestedWriter>,
 {
     fn write_as_latex(&self, dest: IW) -> Result<OW, core::fmt::Error>;
+}
+
+pub trait ConsumingWriteAsLatex<Fl, InitFe, ConseqFe, InitM, ConseqM, NestedWriter, IW, OW>
+where
+    Fl: LatexFlavor,
+    InitFe: LatexFeatures,
+    ConseqFe: LatexFeatures,
+    InitM: LatexMode,
+    ConseqM: LatexMode,
+    NestedWriter: core::fmt::Write,
+    IW: LatexWriter<Flavor = Fl, Features = InitFe, Mode = InitM, NestedWriter = NestedWriter>,
+    OW: LatexWriter<Flavor = Fl, Features = ConseqFe, Mode = ConseqM, NestedWriter = NestedWriter>,
+{
+    fn consuming_write_as_latex(self, dest: IW) -> Result<OW, core::fmt::Error>;
 }
 
 // The function is endofunctional in the second argument in a sense that

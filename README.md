@@ -12,18 +12,28 @@ On top of that, the crate offers feature-gated support for [`nalgebra_linsys`] a
 
 ```rust
 use nalgebra_latex::{
-	latex_writer::{Writer, LatexWriter},
+	latex_writer::{Writer, LatexWriter, UnsafeWrite},
 	latex_flavors::AmsLatex,
 	latex_features::NoFeatures,
-	latex_modes::InnerParagraphMode,
+	latex_modes::{InnerParagraphMode, DisplayMathMode},
 	latex_format,
 };
 
-let s = Writer::<AmsLatex,NoFeatures,InnerParagraphMode,String>::default();
+let mut s = Writer::<AmsLatex,NoFeatures,InnerParagraphMode,String>::default();
 latex_format!(
 	#[on_format_error(unwrap)]
 	s += "$$" ;
+	|mut s: Writer::<AmsLatex,NoFeatures,DisplayMathMode,String>| {
+		unsafe { s.write_str(r"\overrightarrow{x}" ) }?; 
+		Ok(s)
+	};
+	// At the moment of writing string literals are being pushed inside of writers without validation o contents
+	// However, it can change in the future
+	" = (x_1,x_2)";
+	"$$" ;
 );
+let (s,_no_features) = s.into_raw_parts();
+assert_eq!(s, r"$$\overrightarrow{x} = (x_1,x_2)$$");
 ```
 
 ## What is [`nalgebra`]?

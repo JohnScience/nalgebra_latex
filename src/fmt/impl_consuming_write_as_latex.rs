@@ -1,4 +1,4 @@
-use super::WriteAsLatex;
+use super::ConsumingWriteAsLatex;
 use crate::{
     latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::LatexMode,
     latex_writer::LatexWriter,
@@ -7,7 +7,8 @@ use core::fmt::{Error, Write};
 
 macro_rules! impl_for_prim_numeric {
     ($t:ident) => {
-        impl<Fl, Fe, M, NestedWriter, W> WriteAsLatex<Fl, Fe, Fe, M, M, NestedWriter, W, W> for $t
+        impl<Fl, Fe, M, NestedWriter, W> ConsumingWriteAsLatex<Fl, Fe, Fe, M, M, NestedWriter, W, W>
+            for $t
         where
             Fl: LatexFlavor,
             Fe: LatexFeatures,
@@ -15,7 +16,7 @@ macro_rules! impl_for_prim_numeric {
             NestedWriter: Write,
             W: LatexWriter<Flavor = Fl, Features = Fe, Mode = M, NestedWriter = NestedWriter>,
         {
-            fn write_as_latex(&self, dest: W) -> Result<W, Error> {
+            fn consuming_write_as_latex(self, dest: W) -> Result<W, Error> {
                 let (mut nested_writer, features) = dest.into_raw_parts();
                 write!(nested_writer, "{}", self)?;
                 Ok(unsafe { W::from_raw_parts(nested_writer, features) })
@@ -50,7 +51,7 @@ impl<
         OutputWriter,
         F,
     >
-    WriteAsLatex<
+    ConsumingWriteAsLatex<
         Flavor,
         InitialFeatures,
         ConsequentFeatures,
@@ -79,9 +80,9 @@ where
         Mode = ConsequentLatexMode,
         NestedWriter = NestedWriter,
     >,
-    F: Fn(InitalWriter) -> Result<OutputWriter, Error>,
+    F: FnOnce(InitalWriter) -> Result<OutputWriter, Error>,
 {
-    fn write_as_latex(&self, dest: InitalWriter) -> Result<OutputWriter, Error> {
+    fn consuming_write_as_latex(self, dest: InitalWriter) -> Result<OutputWriter, Error> {
         (self)(dest)
     }
 }

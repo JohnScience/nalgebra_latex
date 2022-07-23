@@ -17,7 +17,7 @@ where
     ) -> Result<Self::OWriter, core::fmt::Error>;
     #[inline(always)]
     fn write_closing_tag(w: Self::InterWriter) -> Result<Self::OWriter, core::fmt::Error> {
-        let (nested_writer, features) = w.to_raw_parts();
+        let (nested_writer, features) = w.into_raw_parts();
         unsafe { Self::write_closing_tag_unchecked(nested_writer, features) }
     }
 }
