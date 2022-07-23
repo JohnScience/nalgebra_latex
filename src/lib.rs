@@ -47,6 +47,12 @@ mod macros {
             };
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
         };
+        (#[on_format_error($strategy:tt)] $w:ident += let mut $pattern:pat = $expr:expr; $($tail:tt)*) => {
+            let mut $pattern = $expr;
+        };
+        (#[on_format_error($strategy:tt)] $w:ident += let $pattern:pat = $expr:expr; $($tail:tt)*) => {
+            let $pattern = $expr;
+        };
         (#[on_format_error($strategy:tt)] $w:ident += $write_as_latex_implementor:expr; $($tail:tt)*) => {
             let $w = {
                 use ::nalgebra_latex::fmt::ConsumingWriteAsLatex;
