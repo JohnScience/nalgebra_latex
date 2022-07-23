@@ -83,11 +83,6 @@ macro_rules! decl_latex_modes {
             const CATEGORY_ENUM_VARIANT: CE;
         }
 
-        pub trait ControlSeqDelimited {
-            fn write_opening_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error>;
-            fn write_closing_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error>;
-        }
-
         $(
             pub trait $cat_trait: LatexMode {
                 fn category_enum(&self) -> $cat_enum;
@@ -138,24 +133,6 @@ macro_rules! decl_latex_modes {
                 }
             )+
         )+
-
-        impl ControlSeqDelimited for InlineMathMode {
-            fn write_opening_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
-                w.write_char('$')
-            }
-            fn write_closing_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
-                w.write_char('$')
-            }
-        }
-
-        impl ControlSeqDelimited for DisplayMathMode {
-            fn write_opening_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
-                w.write_str("$$")
-            }
-            fn write_closing_control_seq<W: core::fmt::Write>(w: &mut W) -> Result<(), core::fmt::Error> {
-                w.write_str("$$")
-            }
-        }
     };
 }
 
