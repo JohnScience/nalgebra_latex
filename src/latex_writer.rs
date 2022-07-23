@@ -1,13 +1,13 @@
-use core::marker::PhantomData;
+use core::{marker::PhantomData, fmt::Error};
 
 use crate::{
     latex_features::{LatexFeatures, NoFeatures},
     latex_flavors::LatexFlavorKindExt,
-    latex_modes::LatexMode,
+    latex_modes::{LatexMode, InnerParagraphMode, DisplayMathMode, InlineMathMode},
 };
 
 #[inline(always)]
-pub fn write_latex<IW, OW, T>(w: IW, t: &T) -> Result<OW, core::fmt::Error>
+pub fn write_latex<IW, OW, T>(w: IW, t: &T) -> Result<OW, Error>
 where
     (IW, OW, T): WriteLatexTuple<IWriter = IW, OWriter = OW, Writable = T>,
 {
@@ -20,13 +20,33 @@ pub trait WriteLatexTuple {
     type Writable;
 
     fn write_latex(w: Self::IWriter, t: &Self::Writable)
-        -> Result<Self::OWriter, core::fmt::Error>;
+        -> Result<Self::OWriter, Error>;
 }
 
 pub trait UnsafeWrite {
-    unsafe fn write_str(&mut self, s: &str) -> Result<(), core::fmt::Error>;
+    unsafe fn write_str(&mut self, s: &str) -> Result<(), Error>;
     unsafe fn write_char(&mut self, c: char) -> core::fmt::Result;
     unsafe fn write_fmt(&mut self, args: core::fmt::Arguments) -> core::fmt::Result;
+}
+
+pub trait WriteTwoDollarSignsTargetExt: LatexWriter {
+    type WriteTwoDollarSignsTarget: LatexWriter<
+    NestedWriter = Self::NestedWriter,
+    Flavor = Self::Flavor,
+    Features = Self::Features,
+>;
+}
+
+pub trait WriteDollarSignTargetExt: LatexWriter {
+    type WriteDollarSignTarget: LatexWriter<
+        NestedWriter = Self::NestedWriter,
+        Flavor = Self::Flavor,
+        Features = Self::Features,
+    >;
+}
+
+pub trait WriteTwoDollarSigns: WriteTwoDollarSignsTargetExt {
+    fn write_two_dollar_signs(self) -> Result<Self::WriteTwoDollarSignsTarget, Error>;
 }
 
 pub trait LatexWriter: UnsafeWrite {
@@ -34,6 +54,41 @@ pub trait LatexWriter: UnsafeWrite {
     type Flavor: LatexFlavorKindExt;
     type Features: LatexFeatures;
     type Mode: LatexMode;
+
+    // With GATs, the following types will be pointless in the trait.
+    #[deprecated(
+        since = "0.1.0",
+        note = "This type together with other deprecated types in the trait is a temporary solution which
+        soon will be swapped for one GAT."
+    )]
+    type InnerParagraphWriter: LatexWriter<
+        Flavor = Self::Flavor,
+        Features = Self::Features,
+        Mode = InnerParagraphMode,
+        NestedWriter = Self::NestedWriter,
+    >;
+    #[deprecated(
+        since = "0.1.0",
+        note = "This type together with other deprecated types in the trait is a temporary solution which
+        soon will be swapped for one GAT."
+    )]
+    type DisplayMathWriter: LatexWriter<
+        Flavor = Self::Flavor,
+        Features = Self::Features,
+        Mode = DisplayMathMode,
+        NestedWriter = Self::NestedWriter
+    >;
+    #[deprecated(
+        since = "0.1.0",
+        note = "This type together with other deprecated types in the trait is a temporary solution which
+        soon will be swapped for one GAT."
+    )]
+    type InlineMathWriter: LatexWriter<
+        Flavor = Self::Flavor,
+        Features = Self::Features,
+        Mode = InlineMathMode,
+        NestedWriter = Self::NestedWriter
+    >;
 
     fn to_raw_parts(self) -> (Self::NestedWriter, Self::Features);
     unsafe fn from_raw_parts(w: Self::NestedWriter, features: Self::Features) -> Self;
@@ -67,6 +122,16 @@ pub trait LatexWriter: UnsafeWrite {
         Self::NestedWriter: Default,
     {
         Self::new(Default::default())
+    }
+
+    #[inline(always)]
+    fn write_two_dollar_signs(mut self) -> Result<Self::WriteTwoDollarSignsTarget, Error>
+    where
+        Self: Sized + WriteTwoDollarSignsTargetExt
+    {
+        unsafe { self.write_str("$$") }?;
+        let (nested_writer, features) = self.to_raw_parts();
+        Ok(unsafe { <_>::from_raw_parts(nested_writer, features) })
     }
 }
 
@@ -128,7 +193,7 @@ where
     M: LatexMode,
 {
     #[inline(always)]
-    unsafe fn write_str(&mut self, s: &str) -> Result<(), core::fmt::Error> {
+    unsafe fn write_str(&mut self, s: &str) -> Result<(), Error> {
         self.writer.write_str(s)
     }
 
@@ -155,6 +220,27 @@ where
     type Features = Fe;
     type Mode = M;
 
+    type DisplayMathWriter = Writer<
+        Fl,
+        Fe,
+        DisplayMathMode,
+        W
+    >;
+
+    type InlineMathWriter = Writer<
+        Fl,
+        Fe,
+        InlineMathMode,
+        W
+    >;
+
+    type InnerParagraphWriter = Writer<
+        Fl,
+        Fe,
+        InnerParagraphMode,
+        W
+    >;
+
     #[inline(always)]
     fn to_raw_parts(self) -> (Self::NestedWriter, Self::Features) {
         (self.writer, self.features)
@@ -169,4 +255,44 @@ where
             mode: PhantomData,
         }
     }
+}
+
+impl<Fl, Fe, W> WriteTwoDollarSignsTargetExt for Writer<Fl, Fe, DisplayMathMode, W>
+where
+    W: core::fmt::Write,
+    Fl: LatexFlavorKindExt,
+    Fe: LatexFeatures
+{
+    #[allow(deprecated)]
+    type WriteTwoDollarSignsTarget = Self::InnerParagraphWriter;
+}
+
+impl<Fl, Fe, W> WriteTwoDollarSignsTargetExt for Writer<Fl, Fe, InnerParagraphMode, W>
+where
+    W: core::fmt::Write,
+    Fl: LatexFlavorKindExt,
+    Fe: LatexFeatures
+{
+    #[allow(deprecated)]
+    type WriteTwoDollarSignsTarget = Self::DisplayMathWriter;
+}
+
+impl<Fl, Fe, W> WriteDollarSignTargetExt for Writer<Fl, Fe, InlineMathMode, W>
+where
+    W: core::fmt::Write,
+    Fl: LatexFlavorKindExt,
+    Fe: LatexFeatures
+{
+    #[allow(deprecated)]
+    type WriteDollarSignTarget = Self::InnerParagraphWriter;
+}
+
+impl<Fl, Fe, W> WriteDollarSignTargetExt for Writer<Fl, Fe, InnerParagraphMode, W>
+where
+    W: core::fmt::Write,
+    Fl: LatexFlavorKindExt,
+    Fe: LatexFeatures
+{
+    #[allow(deprecated)]
+    type WriteDollarSignTarget = Self::InlineMathWriter;
 }

@@ -16,9 +16,14 @@ use nalgebra_latex::{
 	latex_flavors::AmsLatex,
 	latex_features::NoFeatures,
 	latex_modes::InnerParagraphMode,
+	latex_format,
 };
 
 let s = Writer::<AmsLatex,NoFeatures,InnerParagraphMode,String>::default();
+latex_format!(
+	#[on_format_error(unwrap)]
+	s += "$$" ;
+);
 ```
 
 ## What is [`nalgebra`]?
