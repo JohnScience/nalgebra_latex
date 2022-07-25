@@ -1,9 +1,13 @@
 use crate::{
-    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::{LatexMode, DisplayMathMode, InnerParagraphMode},
-    latex_writer::{LatexWriter, WriteTwoDollarSigns, WriteDollarSignTargetExt, WriteTwoDollarSignsTargetExt},
+    latex_features::LatexFeatures,
+    latex_flavors::LatexFlavor,
+    latex_modes::{DisplayMathMode, InnerParagraphMode, LatexMode},
+    latex_writer::{
+        LatexWriter, WriteTwoDollarSigns, WriteTwoDollarSignsTargetExt,
+    },
 };
 
-use self::labels::{LabelGenerator, EqChangeExt};
+use self::labels::{EqChangeExt, LabelGenerator};
 
 #[cfg(feature = "lin_sys")]
 pub mod labels;
@@ -81,32 +85,28 @@ where
         W: LatexWriter<Flavor = Fl, Features = Fe, Mode = M, NestedWriter = NW>;
 }
 
-pub trait FormatAsLabelledDisplayMathBlock<Fl,Fe,I>:
-    LatexFormatter<
-        Fl,
-        Fe,
-        Fe,
-        DisplayMathMode,
-        DisplayMathMode,
-        I,
-    >
+pub trait FormatAsLabelledDisplayMathBlock<Fl, Fe, I>:
+    LatexFormatter<Fl, Fe, Fe, DisplayMathMode, DisplayMathMode, I>
 where
     Fl: LatexFlavor,
     Fe: LatexFeatures,
 {
-    fn format_as_labelled_display_math_block<G,IW,OW,L>(
+    #[allow(deprecated)]
+    fn format_as_labelled_display_math_block<G, IW, OW, L>(
         &self,
         dest: IW,
         label_gen: &mut G,
         input: &I,
-    ) -> Result<OW, core::fmt::Error>
+    ) -> Result<(OW,L), core::fmt::Error>
     where
         G: LabelGenerator<Label = L> + EqChangeExt,
         IW: LatexWriter<
-            Flavor = Fl,
-            Features = Fe,
-            Mode = InnerParagraphMode,
-            NestedWriter = OW::NestedWriter,
-        > + WriteTwoDollarSigns + WriteTwoDollarSignsTargetExt<Mode = DisplayMathMode>,
+                Flavor = Fl,
+                Features = Fe,
+                Mode = InnerParagraphMode,
+                NestedWriter = OW::NestedWriter,
+            > + WriteTwoDollarSigns,
+        IW::WriteTwoDollarSignsTarget: LatexWriter<Mode = DisplayMathMode>,
+        IW::DisplayMathWriter: WriteTwoDollarSignsTargetExt<WriteTwoDollarSignsTarget = IW>,
         OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>;
 }

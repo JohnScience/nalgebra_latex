@@ -1,4 +1,7 @@
-use crate::{latex_writer::LatexWriter, latex_flavors::LatexFlavor, latex_features::LatexFeatures, latex_modes::LatexMode};
+use crate::{
+    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::LatexMode,
+    latex_writer::LatexWriter,
+};
 
 pub unsafe trait LatexEnvironment<Fl, Fe, M, W, InitW>
 where

@@ -1,10 +1,10 @@
 use nalgebra::{Dim, Matrix, RawStorage};
 
+pub mod env;
 pub mod err;
 pub mod fmt;
 pub mod numbering;
 pub mod unknowns;
-pub mod env;
 
 pub struct LinSys<T, R, C, S, U>
 where

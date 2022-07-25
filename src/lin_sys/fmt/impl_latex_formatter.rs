@@ -1,11 +1,13 @@
 use nalgebra::{Dim, RawStorage};
 
 use crate::{
+    env::LatexEnvironment,
     fmt::{LatexFormatter, PartialEndofunctionalWriteAsLatex},
     latex_features::LatexFeatures,
     latex_flavors::LatexFlavor,
     latex_modes::MathLatexMode,
-    lin_sys::{unknowns::Unknowns, LinSys, env::CasesEnvironment}, latex_writer::LatexWriter, env::LatexEnvironment,
+    latex_writer::LatexWriter,
+    lin_sys::{env::CasesEnvironment, unknowns::Unknowns, LinSys},
 };
 
 use super::{CasesLinSysFormatter, PlainLinSysFormatter};
@@ -57,9 +59,9 @@ where
     }
 }
 
-impl<Fl,Fe,M,T,R,C,S,U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
+impl<Fl, Fe, M, T, R, C, S, U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
     for CasesLinSysFormatter
-    where
+where
     Fl: LatexFlavor,
     Fe: LatexFeatures,
     M: MathLatexMode,
@@ -71,12 +73,7 @@ impl<Fl,Fe,M,T,R,C,S,U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
 {
     fn fmt<IW, OW>(mut dest: IW, input: &LinSys<T, R, C, S, U>) -> Result<OW, core::fmt::Error>
     where
-        IW: LatexWriter<
-            Flavor = Fl,
-            Features = Fe,
-            Mode = M,
-            NestedWriter = OW::NestedWriter,
-        >,
+        IW: LatexWriter<Flavor = Fl, Features = Fe, Mode = M, NestedWriter = OW::NestedWriter>,
         OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = M>,
     {
         dest = CasesEnvironment::write_opening_tag(dest)?;

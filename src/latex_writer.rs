@@ -20,12 +20,14 @@ pub trait WriteTwoDollarSignsTargetExt: LatexWriter {
     >;
 }
 
-pub trait WriteDollarSignTargetExt: LatexWriter {
-    type WriteDollarSignTarget: LatexWriter<
+pub trait WriteDollarSignsTargetExt: LatexWriter {
+    type WriteDollarSignsTarget: LatexWriter<
         NestedWriter = Self::NestedWriter,
         Flavor = Self::Flavor,
         Features = Self::Features,
-    >;
+    >
+        // This doesn't seem to be deduced by the compiler but keeping it doesn't hurt
+        + WriteDollarSignsTargetExt<WriteDollarSignsTarget = Self>;
 }
 
 pub trait WriteTwoDollarSigns: WriteTwoDollarSignsTargetExt {
@@ -245,22 +247,22 @@ where
     type WriteTwoDollarSignsTarget = Self::DisplayMathWriter;
 }
 
-impl<Fl, Fe, W> WriteDollarSignTargetExt for Writer<Fl, Fe, InlineMathMode, W>
+impl<Fl, Fe, W> WriteDollarSignsTargetExt for Writer<Fl, Fe, InlineMathMode, W>
 where
     W: core::fmt::Write,
     Fl: LatexFlavorKindExt,
     Fe: LatexFeatures,
 {
     #[allow(deprecated)]
-    type WriteDollarSignTarget = Self::InnerParagraphWriter;
+    type WriteDollarSignsTarget = Self::InnerParagraphWriter;
 }
 
-impl<Fl, Fe, W> WriteDollarSignTargetExt for Writer<Fl, Fe, InnerParagraphMode, W>
+impl<Fl, Fe, W> WriteDollarSignsTargetExt for Writer<Fl, Fe, InnerParagraphMode, W>
 where
     W: core::fmt::Write,
     Fl: LatexFlavorKindExt,
     Fe: LatexFeatures,
 {
     #[allow(deprecated)]
-    type WriteDollarSignTarget = Self::InlineMathWriter;
+    type WriteDollarSignsTarget = Self::InlineMathWriter;
 }
