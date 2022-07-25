@@ -1,6 +1,6 @@
 use crate::{
     latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::{LatexMode, DisplayMathMode, InnerParagraphMode},
-    latex_writer::{LatexWriter, WriteTwoDollarSigns, WriteDollarSignTargetExt, WriteTwoDollarSignsTargetExt},
+    latex_writer::{LatexWriter, WriteTwoDollarSigns, WriteTwoDollarSignsTargetExt},
 };
 
 use self::labels::{LabelGenerator, EqChangeExt};
@@ -81,32 +81,31 @@ where
         W: LatexWriter<Flavor = Fl, Features = Fe, Mode = M, NestedWriter = NW>;
 }
 
-pub trait FormatAsLabelledDisplayMathBlock<Fl,Fe,I>:
-    LatexFormatter<
-        Fl,
-        Fe,
-        Fe,
-        DisplayMathMode,
-        DisplayMathMode,
-        I,
-    >
-where
-    Fl: LatexFlavor,
-    Fe: LatexFeatures,
+pub trait FormatAsLabelledDisplayMathBlock
 {
-    fn format_as_labelled_display_math_block<G,IW,OW,L>(
-        &self,
+    fn some_fn<IW,OW>(
         dest: IW,
-        label_gen: &mut G,
-        input: &I,
     ) -> Result<OW, core::fmt::Error>
     where
-        G: LabelGenerator<Label = L> + EqChangeExt,
         IW: LatexWriter<
-            Flavor = Fl,
-            Features = Fe,
-            Mode = InnerParagraphMode,
+            Mode = DisplayMathMode,
             NestedWriter = OW::NestedWriter,
         > + WriteTwoDollarSigns + WriteTwoDollarSignsTargetExt<Mode = DisplayMathMode>,
-        OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>;
+        OW: LatexWriter<Mode = InnerParagraphMode>;
+
+    //fn format_as_labelled_display_math_block<G,IW,OW,L>(
+    //    &self,
+    //    dest: IW,
+    //    label_gen: &mut G,
+    //    input: &I,
+    //) -> Result<OW, core::fmt::Error>
+    //where
+    //    G: LabelGenerator<Label = L> + EqChangeExt,
+    //    IW: LatexWriter<
+    //        Flavor = Fl,
+    //        Features = Fe,
+    //        Mode = InnerParagraphMode,
+    //        NestedWriter = OW::NestedWriter,
+    //    > + WriteTwoDollarSigns + WriteTwoDollarSignsTargetExt<Mode = DisplayMathMode>,
+    //    OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>;
 }

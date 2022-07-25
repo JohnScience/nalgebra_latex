@@ -5,36 +5,44 @@ use crate::{fmt::{FormatAsLabelledDisplayMathBlock, PartialEndofunctionalWriteAs
 use super::CasesLinSysFormatter;
 
 
-impl<Fl,Fe,T,R,C,S,U> FormatAsLabelledDisplayMathBlock<Fl,Fe,LinSys<T,R,C,S,U>>
+impl FormatAsLabelledDisplayMathBlock
     for CasesLinSysFormatter
-where
-    Fl: LatexFlavor,
-    Fe: LatexFeatures,
-    T: PartialEndofunctionalWriteAsLatex<Fl, Fe, DisplayMathMode>,
-    R: Dim,
-    C: Dim,
-    S: RawStorage<T, R, C>,
-    U: Unknowns,
 {
-    fn format_as_labelled_display_math_block<G,IW,OW,L>(
-        &self,
+    fn some_fn<IW,OW>(
         dest: IW,
-        label_gen: &mut G,
-        input: &LinSys<T,R,C,S,U>,
     ) -> Result<OW, core::fmt::Error>
     where
-        G: LabelGenerator<Label = L> + EqChangeExt,
         IW: LatexWriter<
-            Flavor = Fl,
-            Features = Fe,
-            Mode = InnerParagraphMode,
+            Mode = DisplayMathMode,
             NestedWriter = OW::NestedWriter,
         > + WriteTwoDollarSigns + WriteTwoDollarSignsTargetExt<Mode = DisplayMathMode>,
-        OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>
+        OW: LatexWriter<Mode = InnerParagraphMode>
     {
         //let dest = WriteTwoDollarSigns::write_two_dollar_signs(dest)?;
         //let label = unsafe { label_gen.write_next_label(&mut dest, G::EQ_CHANGE) }
         //    .map_err(|_| core::fmt::Error);
-
+        todo!()
     }
+
+    // fn format_as_labelled_display_math_block<G,IW,OW,L>(
+    //     &self,
+    //     dest: IW,
+    //     label_gen: &mut G,
+    //     input: &LinSys<T,R,C,S,U>,
+    // ) -> Result<OW, core::fmt::Error>
+    // where
+    //     G: LabelGenerator<Label = L> + EqChangeExt,
+    //     IW: LatexWriter<
+    //         Flavor = Fl,
+    //         Features = Fe,
+    //         Mode = InnerParagraphMode,
+    //         NestedWriter = OW::NestedWriter,
+    //     > + WriteTwoDollarSigns + WriteTwoDollarSignsTargetExt<Mode = DisplayMathMode>,
+    //     OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>
+    // {
+    //     //let dest = WriteTwoDollarSigns::write_two_dollar_signs(dest)?;
+    //     //let label = unsafe { label_gen.write_next_label(&mut dest, G::EQ_CHANGE) }
+    //     //    .map_err(|_| core::fmt::Error);
+    //     todo!()
+    // }
 }
