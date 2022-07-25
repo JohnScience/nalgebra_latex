@@ -88,7 +88,7 @@ pub trait FormatAsLabelledDisplayMathBlock
     ) -> Result<OW, core::fmt::Error>
     where
         IW: LatexWriter<
-            Mode = DisplayMathMode,
+            Mode = InnerParagraphMode,
             NestedWriter = OW::NestedWriter,
         > + WriteTwoDollarSigns + WriteTwoDollarSignsTargetExt<Mode = DisplayMathMode>,
         OW: LatexWriter<Mode = InnerParagraphMode>;
