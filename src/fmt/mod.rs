@@ -1,7 +1,12 @@
 use crate::{
-    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::LatexMode,
-    latex_writer::LatexWriter,
+    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::{LatexMode, DisplayMathMode, InnerParagraphMode},
+    latex_writer::{LatexWriter, WriteTwoDollarSigns, WriteDollarSignTargetExt, WriteTwoDollarSignsTargetExt},
 };
+
+use self::labels::{LabelGenerator, EqChangeExt};
+
+#[cfg(feature = "lin_sys")]
+pub mod labels;
 
 mod impl_consuming_write_as_latex;
 mod impl_partial_endofunctional_write_as_latex;
@@ -21,7 +26,7 @@ pub trait LatexFormatter<
     InitialMode: LatexMode,
     ConsequentMode: LatexMode,
 {
-    fn write<IW, OW>(dest: IW, input: &I) -> Result<OW, core::fmt::Error>
+    fn fmt<IW, OW>(dest: IW, input: &I) -> Result<OW, core::fmt::Error>
     where
         IW: LatexWriter<
             Flavor = Flavor,
@@ -74,4 +79,34 @@ where
     where
         NW: core::fmt::Write,
         W: LatexWriter<Flavor = Fl, Features = Fe, Mode = M, NestedWriter = NW>;
+}
+
+pub trait FormatAsLabelledDisplayMathBlock<Fl,Fe,I>:
+    LatexFormatter<
+        Fl,
+        Fe,
+        Fe,
+        DisplayMathMode,
+        DisplayMathMode,
+        I,
+    >
+where
+    Fl: LatexFlavor,
+    Fe: LatexFeatures,
+{
+    fn format_as_labelled_display_math_block<G,IW,OW,L>(
+        &self,
+        dest: IW,
+        label_gen: &mut G,
+        input: &I,
+    ) -> Result<OW, core::fmt::Error>
+    where
+        G: LabelGenerator<Label = L> + EqChangeExt,
+        IW: LatexWriter<
+            Flavor = Fl,
+            Features = Fe,
+            Mode = InnerParagraphMode,
+            NestedWriter = OW::NestedWriter,
+        > + WriteTwoDollarSigns + WriteTwoDollarSignsTargetExt<Mode = DisplayMathMode>,
+        OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>;
 }

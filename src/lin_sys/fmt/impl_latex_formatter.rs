@@ -5,26 +5,10 @@ use crate::{
     latex_features::LatexFeatures,
     latex_flavors::LatexFlavor,
     latex_modes::MathLatexMode,
-    lin_sys::{unknowns::Unknowns, LinSys},
+    lin_sys::{unknowns::Unknowns, LinSys, env::CasesEnvironment}, latex_writer::LatexWriter, env::LatexEnvironment,
 };
 
 use super::{CasesLinSysFormatter, PlainLinSysFormatter};
-
-//use core::fmt::Write;
-//
-//use crate::{
-//    env::LatexEnvironment,
-//    fmt::{write_latex, LatexFormatter, WriteAsLatex},
-//    latex_modes::{
-//        CategorizedLatexModeKind, CategorizedLatexModeKindExt, CategoryEnumVariantExt,
-//        ControlSeqDelimited, MathLatexMode, MathLatexModeKind,
-//    },
-//    lin_sys::{env::CasesEnvironment, unknowns::Unknowns, LinSys},
-//};
-//use nalgebra::{Dim, RawStorage};
-//
-//use super::{CasesLinSysFormatter, PlainLinSysFormatter};
-//
 
 impl<Fl, Fe, M, T, R, C, S, U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
     for PlainLinSysFormatter
@@ -38,7 +22,7 @@ where
     S: RawStorage<T, R, C>,
     U: Unknowns,
 {
-    fn write<IW, OW>(mut dest: IW, input: &LinSys<T, R, C, S, U>) -> Result<OW, core::fmt::Error>
+    fn fmt<IW, OW>(mut dest: IW, input: &LinSys<T, R, C, S, U>) -> Result<OW, core::fmt::Error>
     where
         IW: crate::latex_writer::LatexWriter<
             Flavor = Fl,
@@ -73,6 +57,34 @@ where
     }
 }
 
+impl<Fl,Fe,M,T,R,C,S,U> LatexFormatter<Fl, Fe, Fe, M, M, LinSys<T, R, C, S, U>>
+    for CasesLinSysFormatter
+    where
+    Fl: LatexFlavor,
+    Fe: LatexFeatures,
+    M: MathLatexMode,
+    T: PartialEndofunctionalWriteAsLatex<Fl, Fe, M>,
+    R: Dim,
+    C: Dim,
+    S: RawStorage<T, R, C>,
+    U: Unknowns,
+{
+    fn fmt<IW, OW>(mut dest: IW, input: &LinSys<T, R, C, S, U>) -> Result<OW, core::fmt::Error>
+    where
+        IW: LatexWriter<
+            Flavor = Fl,
+            Features = Fe,
+            Mode = M,
+            NestedWriter = OW::NestedWriter,
+        >,
+        OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = M>,
+    {
+        dest = CasesEnvironment::write_opening_tag(dest)?;
+        dest = PlainLinSysFormatter::fmt(dest, input)?;
+        dest = CasesEnvironment::write_closing_tag(dest)?;
+        Ok(unsafe { dest.rebuild() })
+    }
+}
 //impl<IM, OM, T, R, C, S, U> LatexFormatter<IM, OM, LinSys<T, R, C, S, U>> for CasesLinSysFormatter
 //where
 //    IM: CategorizedLatexModeKindExt,
