@@ -46,6 +46,15 @@ pub enum CountersLabel {
     Subeq(String),
 }
 
+impl Counters {
+    pub fn new() -> Self {
+        Self {
+            equation: 0,
+            subeq: None,
+        }
+    }
+}
+
 impl LabelGenerator for Counters {
     type Change = CountersChange;
     type Error = CountersLabelGenerationError;

@@ -93,7 +93,6 @@ where
 {
     #[allow(deprecated)]
     fn format_as_labelled_display_math_block<G, IW, OW, L>(
-        &self,
         dest: IW,
         label_gen: &mut G,
         input: &I,
