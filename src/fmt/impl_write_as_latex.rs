@@ -1,6 +1,6 @@
-use super::WriteAsLatex;
+use super::{WriteAsLatex, labels::{CountersLabel, Label, SupportedFlavor}};
 use crate::{
-    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::LatexMode,
+    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::{LatexMode, InlineMathMode},
     latex_writer::LatexWriter,
 };
 use core::fmt::{Error, Write};
@@ -48,7 +48,6 @@ impl<
         NestedWriter,
         InitalWriter,
         OutputWriter,
-        F,
     >
     WriteAsLatex<
         Flavor,
@@ -59,7 +58,7 @@ impl<
         NestedWriter,
         InitalWriter,
         OutputWriter,
-    > for F
+    > for fn(InitalWriter) -> Result<OutputWriter, Error>
 where
     Flavor: LatexFlavor,
     InitialFeatures: LatexFeatures,
@@ -79,9 +78,37 @@ where
         Mode = ConsequentLatexMode,
         NestedWriter = NestedWriter,
     >,
-    F: Fn(InitalWriter) -> Result<OutputWriter, Error>,
 {
     fn write_as_latex(&self, dest: InitalWriter) -> Result<OutputWriter, Error> {
         (self)(dest)
+    }
+}
+
+impl<Fl,Fe,W,IW,OW> WriteAsLatex<Fl, Fe, Fe, InlineMathMode, InlineMathMode, W, IW, OW>
+    for CountersLabel
+where
+    Fl: SupportedFlavor,
+    Fe: LatexFeatures,
+    W: Write,
+    IW: LatexWriter<
+        Flavor = Fl,
+        Features = Fe,
+        Mode = InlineMathMode,
+        NestedWriter = W,
+    >,
+    OW: LatexWriter<
+        Flavor = Fl,
+        Features = Fe,
+        Mode = InlineMathMode,
+        NestedWriter = W,
+    >,
+{
+    fn write_as_latex(&self, dest: IW) -> Result<OW, Error> {
+        let (mut nested_writer, features) = dest.into_raw_parts();
+        let is_referencable =  Fl::is_referencable(self);
+        nested_writer.write_str(if is_referencable { r"/eqref{" } else { "(" } )?;
+        self.write_name(&mut nested_writer)?;
+        nested_writer.write_char(if is_referencable { '}' } else { ')' } )?;
+        Ok(unsafe { OW::from_raw_parts(nested_writer, features) })
     }
 }

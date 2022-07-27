@@ -1,6 +1,6 @@
 use core::{fmt::Error, num::NonZeroU8};
 
-use crate::{latex_modes::DisplayMathMode, latex_writer::{LatexWriter, WriteLabel}};
+use crate::{latex_modes::DisplayMathMode, latex_writer::{LatexWriter, WriteLabel}, latex_flavors::{LatexFlavor, MathJax, AmsLatex}};
 
 pub trait Label {
     fn write_name<W>(&self, dest: &mut W) -> Result<(), Error>
@@ -48,6 +48,10 @@ pub enum CountersChange {
 pub enum CountersLabel {
     Equation(String),
     Subeq(String),
+}
+
+pub trait SupportedFlavor: LatexFlavor {
+    fn is_referencable(label: &CountersLabel) -> bool;
 }
 
 impl Counters {
@@ -118,5 +122,20 @@ impl Label for CountersLabel {
             CountersLabel::Equation(label) => dest.write_str(label.as_str()),
             CountersLabel::Subeq(label) => dest.write_str(label.as_str()),
         }
+    }
+}
+
+impl SupportedFlavor for MathJax {
+    fn is_referencable(label: &CountersLabel) -> bool {
+        match label {
+            CountersLabel::Equation(_) => true,
+            CountersLabel::Subeq(_) => false,
+        }
+    }
+}
+
+impl SupportedFlavor for AmsLatex {
+    fn is_referencable(_label: &CountersLabel) -> bool {
+        true
     }
 }

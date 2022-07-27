@@ -49,7 +49,6 @@ impl<
         NestedWriter,
         InitalWriter,
         OutputWriter,
-        F,
     >
     ConsumingWriteAsLatex<
         Flavor,
@@ -60,7 +59,7 @@ impl<
         NestedWriter,
         InitalWriter,
         OutputWriter,
-    > for F
+    > for fn(InitalWriter) -> Result<OutputWriter, Error>
 where
     Flavor: LatexFlavor,
     InitialFeatures: LatexFeatures,
@@ -80,7 +79,6 @@ where
         Mode = ConsequentLatexMode,
         NestedWriter = NestedWriter,
     >,
-    F: FnOnce(InitalWriter) -> Result<OutputWriter, Error>,
 {
     fn consuming_write_as_latex(self, dest: InitalWriter) -> Result<OutputWriter, Error> {
         (self)(dest)

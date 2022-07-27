@@ -30,8 +30,16 @@ mod macros {
         (#[on_format_error($strategy:tt)] $w:ident += ) => {};
         (#[on_format_error($strategy:tt)] $w:ident += "$$" ; $($tail:tt)*) => {
             let $w = {
-                use ::nalgebra_latex::latex_writer::LatexWriter as LW;
+                use $crate::latex_writer::LatexWriter as LW;
                 let res: Result<_, ::core::fmt::Error> = <_ as LW>::write_two_dollar_signs($w);
+                latex_format!(@handle_possible_error res $strategy)
+            };
+            latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
+        };
+        (#[on_format_error($strategy:tt)] $w:ident += "$" ; $($tail:tt)*) => {
+            let $w = {
+                use $crate::latex_writer::LatexWriter as LW;
+                let res: Result<_, ::core::fmt::Error> = <_ as LW>::write_dollar_sign($w);
                 latex_format!(@handle_possible_error res $strategy)
             };
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
@@ -39,7 +47,7 @@ mod macros {
         (#[on_format_error($strategy:tt)] $w:ident += $str:literal; $($tail:tt)*) => {
             let mut $w = $w;
             let $w = {
-                use ::nalgebra_latex::latex_writer::UnsafeWrite;
+                use $crate::latex_writer::UnsafeWrite;
                 let res: Result<_, ::core::fmt::Error> = unsafe { <_ as UnsafeWrite>::write_str(&mut $w, $str) }
                     .map(move |_| $w);
                 latex_format!(@handle_possible_error res $strategy)
@@ -70,15 +78,25 @@ mod macros {
             let ($($v),+) $(: $t)? = $expr;
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
         };
+        (#[on_format_error($strategy:tt)] $w:ident += &$write_as_latex_implementor:expr; $($tail:tt)*) => {
+            let $w = {
+                use $crate::fmt::WriteAsLatex;
+                use $crate::latex_writer::{LatexWriter as LW, Writer};
+
+                let res = <_ as WriteAsLatex<_,_,_,_,_,_,_,Writer<_,_,_,_>>>::write_as_latex(&$write_as_latex_implementor, $w);
+                latex_format!(@handle_possible_error res $strategy)
+            };
+            latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
+        };
         (#[on_format_error($strategy:tt)] $w:ident += $write_as_latex_implementor:expr; $($tail:tt)*) => {
             let $w = {
-                use ::nalgebra_latex::fmt::ConsumingWriteAsLatex;
-                use ::nalgebra_latex::latex_writer::LatexWriter as LW;
+                use $crate::fmt::ConsumingWriteAsLatex;
+                use $crate::latex_writer::LatexWriter as LW;
 
                 let res = $write_as_latex_implementor.consuming_write_as_latex($w);
                 latex_format!(@handle_possible_error res $strategy)
             };
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
-        }
+        };
     }
 }

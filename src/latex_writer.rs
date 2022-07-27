@@ -20,14 +20,14 @@ pub trait WriteTwoDollarSignsTargetExt: LatexWriter {
     >;
 }
 
-pub trait WriteDollarSignsTargetExt: LatexWriter {
-    type WriteDollarSignsTarget: LatexWriter<
+pub trait WriteDollarSignTargetExt: LatexWriter {
+    type WriteDollarSignTarget: LatexWriter<
         NestedWriter = Self::NestedWriter,
         Flavor = Self::Flavor,
         Features = Self::Features,
     >
         // This doesn't seem to be deduced by the compiler but keeping it doesn't hurt
-        + WriteDollarSignsTargetExt<WriteDollarSignsTarget = Self>;
+        + WriteDollarSignTargetExt<WriteDollarSignTarget = Self>;
 }
 
 pub trait WriteLabel: Sized + LatexWriter<Mode = DisplayMathMode> {
@@ -120,6 +120,17 @@ pub trait LatexWriter: UnsafeWrite {
         let (nested_writer, features) = self.into_raw_parts();
         Ok(unsafe { <_>::from_raw_parts(nested_writer, features) })
     }
+
+    #[inline(always)]
+    fn write_dollar_sign(mut self) -> Result<Self::WriteDollarSignTarget, Error>
+    where
+        Self: Sized + WriteDollarSignTargetExt,
+    {
+        unsafe { self.write_str("$") }?;
+        let (nested_writer, features) = self.into_raw_parts();
+        Ok(unsafe { <_>::from_raw_parts(nested_writer, features) })
+    }
+
 }
 
 pub struct Writer<Fl, Fe, M, W> {
@@ -256,24 +267,24 @@ where
     type WriteTwoDollarSignsTarget = Self::DisplayMathWriter;
 }
 
-impl<Fl, Fe, W> WriteDollarSignsTargetExt for Writer<Fl, Fe, InlineMathMode, W>
+impl<Fl, Fe, W> WriteDollarSignTargetExt for Writer<Fl, Fe, InlineMathMode, W>
 where
     W: core::fmt::Write,
     Fl: LatexFlavorKindExt,
     Fe: LatexFeatures,
 {
     #[allow(deprecated)]
-    type WriteDollarSignsTarget = Self::InnerParagraphWriter;
+    type WriteDollarSignTarget = Self::InnerParagraphWriter;
 }
 
-impl<Fl, Fe, W> WriteDollarSignsTargetExt for Writer<Fl, Fe, InnerParagraphMode, W>
+impl<Fl, Fe, W> WriteDollarSignTargetExt for Writer<Fl, Fe, InnerParagraphMode, W>
 where
     W: core::fmt::Write,
     Fl: LatexFlavorKindExt,
     Fe: LatexFeatures,
 {
     #[allow(deprecated)]
-    type WriteDollarSignsTarget = Self::InlineMathWriter;
+    type WriteDollarSignTarget = Self::InlineMathWriter;
 }
 
 impl<Fe,W> WriteLabel for Writer<MathJax, Fe, DisplayMathMode, W>
