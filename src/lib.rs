@@ -49,7 +49,7 @@ mod macros {
         (#[on_format_error($strategy:tt)] $w:ident +=
             let mut $v:ident $(: $t:ty)? = $expr:expr; $($tail:tt)*
         ) => {
-            let mut $v = $(: $t)? = $expr;
+            let mut $v $(: $t)? = $expr;
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
         };
         (#[on_format_error($strategy:tt)] $w:ident +=
