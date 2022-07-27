@@ -30,7 +30,6 @@ mod macros {
         (#[on_format_error($strategy:tt)] $w:ident += ) => {};
         (#[on_format_error($strategy:tt)] $w:ident += "$$" ; $($tail:tt)*) => {
             let $w = {
-                use ::nalgebra_latex::latex_writer::WriteTwoDollarSigns;
                 use ::nalgebra_latex::latex_writer::LatexWriter as LW;
                 let res: Result<_, ::core::fmt::Error> = <_ as LW>::write_two_dollar_signs($w);
                 latex_format!(@handle_possible_error res $strategy)
@@ -47,12 +46,28 @@ mod macros {
             };
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
         };
-        (#[on_format_error($strategy:tt)] $w:ident += let mut $pattern:pat = $expr:expr; $($tail:tt)*) => {
-            let mut $pattern = $expr;
+        (#[on_format_error($strategy:tt)] $w:ident +=
+            let mut $v:ident $(: $t:ty)? = $expr:expr; $($tail:tt)*
+        ) => {
+            let mut $v = $(: $t)? = $expr;
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
         };
-        (#[on_format_error($strategy:tt)] $w:ident += let $pattern:pat = $expr:expr; $($tail:tt)*) => {
-            let $pattern = $expr;
+        (#[on_format_error($strategy:tt)] $w:ident +=
+            let $v:ident $(: $t:ty)? = $expr:expr; $($tail:tt)*
+        ) => {
+            let $v $(: $t)? = $expr;
+            latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
+        };
+        (#[on_format_error($strategy:tt)] $w:ident +=
+            let mut ($($v:ident),+) $(: $t:ty)? = $expr:expr; $($tail:tt)*
+        ) => {
+            let mut ($($v),+) $(: $t)? = $expr;
+            latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
+        };
+        (#[on_format_error($strategy:tt)] $w:ident +=
+            let ($($v:ident),+) $(: $t:ty)? = $expr:expr; $($tail:tt)*
+        ) => {
+            let ($($v),+) $(: $t)? = $expr;
             latex_format!(#[on_format_error($strategy)] $w += $($tail)*);
         };
         (#[on_format_error($strategy:tt)] $w:ident += $write_as_latex_implementor:expr; $($tail:tt)*) => {

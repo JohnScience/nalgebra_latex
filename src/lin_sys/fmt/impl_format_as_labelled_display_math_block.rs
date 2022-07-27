@@ -8,7 +8,7 @@ use crate::{
     latex_features::LatexFeatures,
     latex_flavors::LatexFlavor,
     latex_modes::{DisplayMathMode, InnerParagraphMode},
-    latex_writer::{LatexWriter, WriteTwoDollarSigns, WriteTwoDollarSignsTargetExt},
+    latex_writer::{LatexWriter, WriteTwoDollarSignsTargetExt},
     lin_sys::{unknowns::Unknowns, LinSys},
 };
 
@@ -38,12 +38,12 @@ where
                 Features = Fe,
                 Mode = InnerParagraphMode,
                 NestedWriter = OW::NestedWriter,
-            > + WriteTwoDollarSigns,
+            > + WriteTwoDollarSignsTargetExt,
         IW::WriteTwoDollarSignsTarget: LatexWriter<Mode = DisplayMathMode>,
         IW::DisplayMathWriter: WriteTwoDollarSignsTargetExt<WriteTwoDollarSignsTarget = IW>,
         OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>,
     {
-        let dest = WriteTwoDollarSigns::write_two_dollar_signs(dest)?;
+        let dest = <IW as LatexWriter>::write_two_dollar_signs(dest)?;
         #[allow(deprecated)]
         let mut dest: <IW as LatexWriter>::DisplayMathWriter
             = <Self as LatexFormatter<Fl,Fe,Fe,DisplayMathMode,DisplayMathMode,LinSys<T, R, C, S, U>>>::fmt(dest, input)?;

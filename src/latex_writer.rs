@@ -30,10 +30,6 @@ pub trait WriteDollarSignsTargetExt: LatexWriter {
         + WriteDollarSignsTargetExt<WriteDollarSignsTarget = Self>;
 }
 
-pub trait WriteTwoDollarSigns: WriteTwoDollarSignsTargetExt {
-    fn write_two_dollar_signs(self) -> Result<Self::WriteTwoDollarSignsTarget, Error>;
-}
-
 pub trait LatexWriter: UnsafeWrite {
     type NestedWriter: core::fmt::Write;
     type Flavor: LatexFlavorKindExt;
