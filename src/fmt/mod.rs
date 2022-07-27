@@ -3,7 +3,7 @@ use crate::{
     latex_flavors::LatexFlavor,
     latex_modes::{DisplayMathMode, InnerParagraphMode, LatexMode},
     latex_writer::{
-        LatexWriter, WriteTwoDollarSignsTargetExt,
+        LatexWriter, WriteTwoDollarSignsTargetExt, WriteLabel,
     },
 };
 
@@ -106,6 +106,6 @@ where
                 NestedWriter = OW::NestedWriter,
             > + WriteTwoDollarSignsTargetExt,
         IW::WriteTwoDollarSignsTarget: LatexWriter<Mode = DisplayMathMode>,
-        IW::DisplayMathWriter: WriteTwoDollarSignsTargetExt<WriteTwoDollarSignsTarget = IW>,
+        IW::DisplayMathWriter: WriteTwoDollarSignsTargetExt<WriteTwoDollarSignsTarget = IW> + WriteLabel,
         OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>;
 }

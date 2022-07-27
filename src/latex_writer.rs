@@ -2,8 +2,8 @@ use core::{fmt::Error, marker::PhantomData};
 
 use crate::{
     latex_features::{LatexFeatures, NoFeatures},
-    latex_flavors::LatexFlavorKindExt,
-    latex_modes::{DisplayMathMode, InlineMathMode, InnerParagraphMode, LatexMode},
+    latex_flavors::{LatexFlavorKindExt, MathJax, AmsLatex},
+    latex_modes::{DisplayMathMode, InlineMathMode, InnerParagraphMode, LatexMode}, fmt::labels::Label,
 };
 
 pub trait UnsafeWrite {
@@ -28,6 +28,12 @@ pub trait WriteDollarSignsTargetExt: LatexWriter {
     >
         // This doesn't seem to be deduced by the compiler but keeping it doesn't hurt
         + WriteDollarSignsTargetExt<WriteDollarSignsTarget = Self>;
+}
+
+pub trait WriteLabel: Sized + LatexWriter<Mode = DisplayMathMode> {
+    fn write_label<L>(&mut self, label: &L) -> Result<(), Error>
+    where
+        L: Label;
 }
 
 pub trait LatexWriter: UnsafeWrite {
@@ -132,6 +138,13 @@ impl<Fl, Fe, M, W> Writer<Fl, Fe, M, W> {
             features,
             mode: PhantomData,
         }
+    }
+
+    pub unsafe fn apply_to_nested_writer<F,O>(&mut self, f: F) -> O
+    where
+        F: Fn(&mut W) -> O,
+    {
+        f(&mut self.writer)
     }
 }
 
@@ -261,4 +274,36 @@ where
 {
     #[allow(deprecated)]
     type WriteDollarSignsTarget = Self::InlineMathWriter;
+}
+
+impl<Fe,W> WriteLabel for Writer<MathJax, Fe, DisplayMathMode, W>
+where
+    Fe: LatexFeatures,
+    W: core::fmt::Write,
+{
+    fn write_label<L>(&mut self, label: &L) -> Result<(), Error>
+        where
+            L: Label {
+        unsafe { self.write_str(r"\tag{") }?;
+        unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
+        unsafe { self.write_str("}") }
+    }
+}
+
+impl<Fe,W> WriteLabel for Writer<AmsLatex, Fe, DisplayMathMode, W>
+where
+    Fe: LatexFeatures,
+    W: core::fmt::Write,
+{
+    fn write_label<L>(&mut self, label: &L) -> Result<(), Error>
+    where
+        L: Label
+    {
+        unsafe { self.write_str(r"\tag{") }?;
+        unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
+        unsafe { self.write_str("}") }?;
+        unsafe { self.write_str(r"\label{") }?;
+        unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
+        unsafe { self.write_str("}") }
+    }
 }

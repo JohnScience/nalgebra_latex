@@ -8,7 +8,7 @@ use crate::{
     latex_features::LatexFeatures,
     latex_flavors::LatexFlavor,
     latex_modes::{DisplayMathMode, InnerParagraphMode},
-    latex_writer::{LatexWriter, WriteTwoDollarSignsTargetExt},
+    latex_writer::{LatexWriter, WriteTwoDollarSignsTargetExt, WriteLabel},
     lin_sys::{unknowns::Unknowns, LinSys},
 };
 
@@ -40,13 +40,14 @@ where
                 NestedWriter = OW::NestedWriter,
             > + WriteTwoDollarSignsTargetExt,
         IW::WriteTwoDollarSignsTarget: LatexWriter<Mode = DisplayMathMode>,
-        IW::DisplayMathWriter: WriteTwoDollarSignsTargetExt<WriteTwoDollarSignsTarget = IW>,
+        IW::DisplayMathWriter: WriteTwoDollarSignsTargetExt<WriteTwoDollarSignsTarget = IW>
+            + WriteLabel,
         OW: LatexWriter<Flavor = Fl, Features = Fe, Mode = InnerParagraphMode>,
     {
-        let dest = <IW as LatexWriter>::write_two_dollar_signs(dest)?;
+        let dest = <IW>::write_two_dollar_signs(dest)?;
         #[allow(deprecated)]
         let mut dest: <IW as LatexWriter>::DisplayMathWriter
-            = <Self as LatexFormatter<Fl,Fe,Fe,DisplayMathMode,DisplayMathMode,LinSys<T, R, C, S, U>>>::fmt(dest, input)?;
+            = <Self>::fmt(dest, input)?;
         let label = unsafe { label_gen.write_next_label(&mut dest, G::EQ_CHANGE) }
             .map_err(|_| core::fmt::Error)?;
         let dest = dest.write_two_dollar_signs()?;
