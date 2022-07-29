@@ -296,8 +296,12 @@ where
 {
     fn write_label<L>(&mut self, label: &L) -> Result<(), Error>
         where
-            L: Label {
+        L: Label
+    {
         unsafe { self.write_str(r"\tag{") }?;
+        unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
+        unsafe { self.write_str("}") }?;
+        unsafe { self.write_str(r"\label{") }?;
         unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
         unsafe { self.write_str("}") }
     }
