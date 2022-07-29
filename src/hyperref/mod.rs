@@ -7,7 +7,10 @@ pub trait SupportedFlavor: LatexFlavor {
     fn is_referencable<'a,'b>(label: &'a Hyperlink<'b>) -> bool;
 }
 
-#[deprecated(since = "0.1.0", note = r"The implementation is a fallback to \textit{text}")]
+#[cfg_attr(
+    not(feature = "silence_deprecation"),
+    deprecated(since = "0.1.0", note = r"The implementation is a fallback to \textit{text}")
+)]
 pub struct Hyperlink<'a> {
     /// e.g. `hadamard_product`
     #[allow(dead_code)]
