@@ -10,6 +10,7 @@ pub mod latex_flavors;
 pub mod latex_modes;
 pub mod latex_writer;
 pub mod lin_sys;
+pub mod hyperref;
 
 mod macros {
     #[macro_export]

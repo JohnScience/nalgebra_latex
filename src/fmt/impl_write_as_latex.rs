@@ -1,6 +1,6 @@
 use super::{WriteAsLatex, labels::{CountersLabel, Label, SupportedFlavor}};
 use crate::{
-    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::{LatexMode, InlineMathMode},
+    latex_features::LatexFeatures, latex_flavors::LatexFlavor, latex_modes::LatexMode,
     latex_writer::LatexWriter,
 };
 use core::fmt::{Error, Write};
@@ -84,22 +84,23 @@ where
     }
 }
 
-impl<Fl,Fe,W,IW,OW> WriteAsLatex<Fl, Fe, Fe, InlineMathMode, InlineMathMode, W, IW, OW>
+impl<Fl,Fe,M,W,IW,OW> WriteAsLatex<Fl, Fe, Fe, M, M, W, IW, OW>
     for CountersLabel
 where
     Fl: SupportedFlavor,
     Fe: LatexFeatures,
+    M: LatexMode,
     W: Write,
     IW: LatexWriter<
         Flavor = Fl,
         Features = Fe,
-        Mode = InlineMathMode,
+        Mode = M,
         NestedWriter = W,
     >,
     OW: LatexWriter<
         Flavor = Fl,
         Features = Fe,
-        Mode = InlineMathMode,
+        Mode = M,
         NestedWriter = W,
     >,
 {

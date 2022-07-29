@@ -111,6 +111,10 @@ pub trait LatexWriter: UnsafeWrite {
         Self::new(Default::default())
     }
 
+    unsafe fn apply_to_nested_writer<F,O>(&mut self, f: F) -> O
+    where
+        F: Fn(&mut Self::NestedWriter) -> O;
+
     #[inline(always)]
     fn write_two_dollar_signs(mut self) -> Result<Self::WriteTwoDollarSignsTarget, Error>
     where
@@ -130,7 +134,6 @@ pub trait LatexWriter: UnsafeWrite {
         let (nested_writer, features) = self.into_raw_parts();
         Ok(unsafe { <_>::from_raw_parts(nested_writer, features) })
     }
-
 }
 
 pub struct Writer<Fl, Fe, M, W> {
@@ -149,13 +152,6 @@ impl<Fl, Fe, M, W> Writer<Fl, Fe, M, W> {
             features,
             mode: PhantomData,
         }
-    }
-
-    pub unsafe fn apply_to_nested_writer<F,O>(&mut self, f: F) -> O
-    where
-        F: Fn(&mut W) -> O,
-    {
-        f(&mut self.writer)
     }
 }
 
@@ -244,6 +240,12 @@ where
             features,
             mode: PhantomData,
         }
+    }
+
+    unsafe fn apply_to_nested_writer<F,O>(&mut self, f: F) -> O
+        where
+            F: Fn(&mut Self::NestedWriter) -> O {
+        f(&mut self.writer)
     }
 }
 
