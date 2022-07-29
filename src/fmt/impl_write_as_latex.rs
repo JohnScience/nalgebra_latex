@@ -107,7 +107,7 @@ where
     fn write_as_latex(&self, dest: IW) -> Result<OW, Error> {
         let (mut nested_writer, features) = dest.into_raw_parts();
         let is_referencable =  Fl::is_referencable(self);
-        nested_writer.write_str(if is_referencable { r"/eqref{" } else { "(" } )?;
+        nested_writer.write_str(if is_referencable { r"\eqref{" } else { "(" } )?;
         self.write_name(&mut nested_writer)?;
         nested_writer.write_char(if is_referencable { '}' } else { ')' } )?;
         Ok(unsafe { OW::from_raw_parts(nested_writer, features) })
