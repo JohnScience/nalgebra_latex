@@ -13,6 +13,7 @@ pub mod lin_sys;
 pub mod hyperref;
 
 mod macros {
+    // Add an option for better error messages.
     #[macro_export]
     macro_rules! latex_format {
         (@handle_possible_error $res:ident ?) => {
