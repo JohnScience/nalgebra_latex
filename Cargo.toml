@@ -56,7 +56,6 @@ evcxr = ["mime_typed", "mime_typed/evcxr_support"]
 hyperref = []
 nightly = ["adt_const_params"]
 adt_const_params = []
-# this feature is needed because warnings in evcxr are hard errors
 silence_deprecation = []
 
 [package.metadata.docs.rs]
