@@ -3,6 +3,8 @@ use core::{fmt::Error, num::NonZeroU8};
 use crate::{latex_modes::DisplayMathMode, latex_writer::{LatexWriter, WriteLabel}, latex_flavors::{LatexFlavor, MathJax, AmsLatex}};
 
 pub trait Label {
+    fn is_subeq(&self) -> bool;
+
     fn write_name<W>(&self, dest: &mut W) -> Result<(), Error>
     where
         W: core::fmt::Write;
@@ -29,6 +31,7 @@ pub trait EqChangeExt: LabelGenerator {
 #[derive(Debug)]
 pub struct LabelGenerationError;
 
+#[derive(Debug)]
 pub enum CountersLabelGenerationError {
     LabelGenerationError,
     FormattingError(Error),
@@ -45,9 +48,12 @@ pub enum CountersChange {
     IncrementSubeq,
 }
 
+pub struct EquationLabel(String);
+pub struct SubeqLabel(String);
+
 pub enum CountersLabel {
-    Equation(String),
-    Subeq(String),
+    Equation(EquationLabel),
+    Subeq(SubeqLabel),
 }
 
 pub trait SupportedFlavor: LatexFlavor {
@@ -83,7 +89,7 @@ impl LabelGenerator for Counters {
                 self.equation = self.equation.checked_add(1).ok_or(LabelGenerationError)?;
                 self.subeq = None;
                 let label = format!("{}", self.equation);
-                CountersLabel::Equation(label)
+                CountersLabel::Equation(EquationLabel(label))
             }
             CountersChange::IncrementSubeq => {
                 let n = match self.subeq {
@@ -95,13 +101,13 @@ impl LabelGenerator for Counters {
                 }
                 let label = format!("{}{}", self.equation, (b'a' + n) as char);
                 self.subeq = Some( NonZeroU8::new_unchecked(n + 1) );
-                CountersLabel::Subeq(label)
+                CountersLabel::Subeq(SubeqLabel(label))
             }
             CountersChange::IncrementEquationAndAddSubeq => {
                 self.equation = self.equation.checked_add(1).ok_or(LabelGenerationError)?;
                 self.subeq = Some( NonZeroU8::new_unchecked(1) );
                 let label = format!("{}a", self.equation);
-                CountersLabel::Subeq(label)
+                CountersLabel::Subeq(SubeqLabel(label))
             }
         };
         dest.write_label(&label).map_err(FormattingError)?;
@@ -114,13 +120,20 @@ impl EqChangeExt for Counters {
 }
 
 impl Label for CountersLabel {
+    fn is_subeq(&self) -> bool {
+        match self {
+            CountersLabel::Equation(_) => false,
+            CountersLabel::Subeq(_) => true,
+        }
+    }
+
     fn write_name<W>(&self, dest: &mut W) -> Result<(), Error>
     where
         W: core::fmt::Write,
     {
         match self {
-            CountersLabel::Equation(label) => dest.write_str(label.as_str()),
-            CountersLabel::Subeq(label) => dest.write_str(label.as_str()),
+            CountersLabel::Equation(label) => dest.write_str(label.0.as_str()),
+            CountersLabel::Subeq(label) => dest.write_str(label.0.as_str()),
         }
     }
 }

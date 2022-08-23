@@ -298,12 +298,20 @@ where
         where
         L: Label
     {
-        unsafe { self.write_str(r"\tag{") }?;
-        unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
-        unsafe { self.write_str("}") }?;
-        unsafe { self.write_str(r"\label{") }?;
-        unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
-        unsafe { self.write_str("}") }
+        if label.is_subeq() {
+            // By default, MathJax doesn't support multiple labels so
+            // we fall back to emulating them
+            unsafe { self.write_str("& (") }?;
+            unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
+            unsafe { self.write_char(')')}
+        } else {
+            unsafe { self.write_str(r"\tag{") }?;
+            unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
+            unsafe { self.write_str("}") }?;
+            unsafe { self.write_str(r"\label{") }?;
+            unsafe { self.apply_to_nested_writer(|w| label.write_name(w)) }?;
+            unsafe { self.write_str("}") }
+        }
     }
 }
 
